@@ -6,7 +6,7 @@ const baseurl = process.env.NODE_ENV==='development'?process.env.VUE_APP_URL:'/'
 axios.interceptors.response.use(
     response => {
         const res = response.data
-		console.log(res)
+		// console.log(res)
         if (res && res.status !=200) {
            
 			if(res.status ===401){
@@ -53,9 +53,10 @@ const htpreq = {
 				baseURL:baseurl,
 				timeout:10000,
 				async:opt.async || true,
+				
 				headers:opt.headers || {
 					"Content-Type": 'application/json; charset=utf-8',
-					// 'Authorization': sessionStorage.getItem('token') || null
+					'Authorization': sessionStorage.getItem('token') || null
 				},
 				data:opt.data || null
 			}).then( response=>{
@@ -70,10 +71,17 @@ const htpreq = {
 						type:'error',
 						confirmButtonText: '确定',
 						callback:action=>{
+							sessionStorage.setItem("token",'')
+							// 通过状态保存当前from页面，登录后自动跳转
 							this.$router.push({
 								name: 'Login'
 							})
 						}
+					})
+				}else{
+					console.log("403是未授权被禁止，跳转到首页")
+					this.$router.push({
+						name: 'First'
 					})
 				}
 			})

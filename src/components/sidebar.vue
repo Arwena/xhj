@@ -43,19 +43,16 @@
 			getNavlist(){
 				this.$http({
 					url:'/menu/routing',
-					headers:{
-						'Authorization':sessionStorage.getItem('token')||null
-					}
 				}).then(res=>{
-					console.log(res)
+					// console.log(res)
 					this.navlist = res
 				})
 			},
 			handleOpen(key,keypath){
-				console.log(key,keypath)
+				// console.log(key,keypath)
 			},
 			handleClose(key,keypath){
-				console.log(key,keypath)
+				// console.log(key,keypath)
 			}
 		}
 	}

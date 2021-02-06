@@ -1,10 +1,12 @@
 <template>
 	<div v-if="item.available">
 		<template v-if="item.children ==null">
-			<el-menu-item :index="item.menuId.toString()">
-				<i v-if="item.icon!=''" :class="item.icon"></i>
-				<span>{{item.menuName}}</span>
-			</el-menu-item>
+			<router-link :to="item.path">
+				<el-menu-item :index="item.menuId.toString()">
+					<i v-if="item.icon!=''" :class="item.icon"></i>
+					<span>{{item.menuName}}</span>
+				</el-menu-item>
+			</router-link>
 		</template>
 		<el-submenu v-else :index="item.menuId.toString()">
 			<template slot="title">

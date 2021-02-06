@@ -28,3 +28,11 @@
 		}
 	}
 </script>
+
+<style lang="less">
+	.noth{
+		width: 100%;
+		height: 100%;
+		background: url(~@/assets/image/loginbg.png) no-repeat 80% 80%;
+	}
+</style>

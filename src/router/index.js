@@ -40,6 +40,21 @@ const routes = [
 			  component: () => import(/* webpackChunkName: "first" */ '../views/first.vue')
 			}
 		]
+  },
+  {
+	path:"/sys",
+	name:'System',
+	component:() => import('@/views/Home.vue'),
+	redirect:{
+		name:'User'
+	},
+	children:[
+		{
+			path:'/sys/user',
+			name:'User',
+			component:() =>import(/* webpackChunkName: "user" */ '../views/system/usermanage.vue')
+		}
+	]
   }
 ]
 //相同路径跳转报错
