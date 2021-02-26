@@ -6,7 +6,6 @@ const baseurl = process.env.NODE_ENV==='development'?process.env.VUE_APP_URL:'/'
 axios.interceptors.response.use(
     response => {
         const res = response.data
-		// console.log(res)
         if (res && res.status !=200) {
            
 			if(res.status ===401){
@@ -34,15 +33,6 @@ axios.interceptors.response.use(
         return Promise.reject(error)
     }
 )
-
-// const http = 
-// 	axios.create({
-// 		baseURL:baseurl,
-// 		timeout:10000,
-// 		headers:{
-// 			'Content-Type':'application/json;charset=utf-8'
-// 		}
-// 	})
 	
 const htpreq = {
 	request(opt){
@@ -62,7 +52,9 @@ const htpreq = {
 			}).then( response=>{
 				let res = response.data
 				console.log(res)
-				resolve(res.data)
+				if(res.status == 200){
+					resolve(res.data)
+				}
 			}).catch(err =>{
 				console.log(err)
 				if(err =='Error: Request failed with status code 401'){
@@ -79,9 +71,16 @@ const htpreq = {
 						}
 					})
 				}else{
-					console.log("403是未授权被禁止，跳转到首页")
-					this.$router.push({
-						name: 'First'
+					// console.log("403是未授权被禁止，跳转到首页")
+					MessageBox({
+						message:'未被授权，禁止访问',
+						type:'error',
+						confirmButtonText:'确定',
+						callback:action =>{
+							this.$router.push({
+								name: 'First'
+							})
+						}
 					})
 				}
 			})

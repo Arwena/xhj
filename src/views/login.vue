@@ -4,7 +4,7 @@
 			<h1>泸州市泸县智能交通系统一体化调控平台</h1>
 			<h5>Integrated control platform of the intelligent transportation system in Luxian,Luzhou</h5>
 			<div class="login-box">
-				<el-form label-position="top" :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="" >
+				<el-form label-position="top" :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="" @keyup.enter.native="submitForm('ruleForm')">
 				  <el-form-item label="用户" prop="user">
 				    <el-input type="username" v-model="ruleForm.user" auto-complete="off"></el-input>
 				  </el-form-item>

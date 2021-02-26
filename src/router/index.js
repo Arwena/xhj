@@ -53,6 +53,31 @@ const routes = [
 			path:'/sys/user',
 			name:'User',
 			component:() =>import(/* webpackChunkName: "user" */ '../views/system/usermanage.vue')
+		},
+		{
+			path:'/sys/role',
+			name:'Role',
+			component:() =>import(/* webpackChunkName: "role" */ '../views/system/rolemanage.vue')
+		},
+		{
+			path:'/sys/zone',
+			name:'Zone',
+			component:()=>import('../views/system/zonemanage.vue')
+		},
+		{
+			path:'/sys/dictionary',
+			name:'Dictionary',
+			component:()=>import('../views/system/dictionary.vue')
+		},
+		{
+			path:'/sys/config',
+			name:'Config',
+			component:() => import('../views/system/config.vue')
+		},
+		{
+			path:'/sys/log',
+			name:'Log',
+			component:() => import('../views/system/log.vue')
 		}
 	]
   }
@@ -68,7 +93,10 @@ VueRouter.prototype.push = function push(location, onResolve, onReject) {
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  routes
+  routes,
+  scrollBehavior:() =>{
+	  y:0
+  }
 })
 
 export default router

@@ -43,4 +43,19 @@ a{
     }
   }
 }
+.f-right{
+	float: right;
+}
+.topbtn {
+	width: 90%;
+	margin: 20px auto;
+	.el-input{
+		width: 30%;
+		margin-right:10px ;
+		.el-input__inner{
+			border-radius:20px
+		}
+	}
+}
+
 </style>

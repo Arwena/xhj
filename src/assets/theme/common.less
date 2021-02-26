@@ -1,0 +1,50 @@
+// 表格样式
+.el-table{
+	width: 90%;
+	// height: 620px;
+	margin:30px auto;
+	// background: rgb(12, 41, 106,0.02);
+	background: none;
+	color: #fff;
+	
+	tr,th{
+		background: none;
+	}
+	th.is-leaf{
+		border-bottom: 1px solid #5487c8;
+	}
+	tr:hover >td{
+		
+		background: rgb(0, 28, 71)!important;
+	}
+	td{
+		border-bottom: 1px solid #5487c8;
+	}
+}
+.el-table--border{
+	border-color:#5487c8;
+	td,th{
+		border-right: 1px solid #5487c8
+	}
+}
+.el-table--border::after,  .el-table::before{
+	background-color:#5487c8
+}
+
+//对话框
+.el-dialog{
+		.el-dialog__header{
+			background-color: #ecf5ff;
+			color: #409EFF;
+		}
+		.el-input{
+			width: 300px;
+		}
+		.el-textarea{
+			width: 730px;
+		}
+		.el-tree {
+			width: 300px;
+		}
+		
+	}
