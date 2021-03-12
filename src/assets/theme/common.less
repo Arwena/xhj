@@ -9,9 +9,19 @@
 	
 	tr,th{
 		background: none;
+		.el-table__expanded-cell{
+			margin: 0px;
+			background: none;
+			.el-table{
+				margin: 0px;
+			}
+		}
 	}
 	th.is-leaf{
 		border-bottom: 1px solid #5487c8;
+	}
+	tr.current-row>td{
+		background: rgb(0, 28, 71)
 	}
 	tr:hover >td{
 		
@@ -31,6 +41,9 @@
 	background-color:#5487c8
 }
 
+.el-table__expand-icon{
+	color: #fff;
+}
 //对话框
 .el-dialog{
 		.el-dialog__header{

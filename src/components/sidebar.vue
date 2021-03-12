@@ -45,7 +45,7 @@
 					url:'/menu/routing',
 				}).then(res=>{
 					// console.log(res)
-					this.navlist = res
+					this.navlist = res.data
 				})
 			},
 			handleOpen(key,keypath){

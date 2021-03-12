@@ -2,7 +2,7 @@
 	<div class="noth">
 		<div class="topbtn">
 			<el-input placeholder="请输入查询内容" v-model="querykey" clearable maxlength=300></el-input>
-			<el-button type="primary" round plain @click="getRoleList">查询</el-button>
+			<el-button type="primary" round plain @click="getList">查询</el-button>
 			<el-button type="primary" round plain @click="keyReset">重置</el-button>
 			<el-button type="primary" round icon="el-icon-circle-plus-outline" style="margin-left: 40px;" @click="add">新增</el-button>
 			<el-button type="primary" round  icon="el-icon-edit" @click="edit">编辑</el-button>
@@ -15,13 +15,18 @@
 			<el-table-column label="角色名称" prop="roleName" width="400"></el-table-column>
 			<el-table-column label="备注" prop="remark"></el-table-column>
 		</el-table>
+		<!-- 分页 -->
+		<el-pagination background layout="prev, pager,next" :total="pager.totalcount" :hide-on-single-page='true' @current-change="pageChange"></el-pagination>
 		<el-dialog :title="dialogTitle" :visible.sync="dialog">
 			<el-form :model="roleform" :inline="true" label-position="center">
 				<el-form-item label="角色名称" label-width="120px">
 					<el-input v-model="roleform.roleName"></el-input>
 				</el-form-item>
+				<el-form-item label="关联菜单" label-width="120px">
+					<el-tree :data="menuList" node-key="menuId" ref="menutree" :default-expanded-keys="roleform.menuIds" show-checkbox :props="defaultProps"></el-tree>
+				</el-form-item>
 				<el-form-item label="备注" label-width="120px">
-					<el-input v-model="roleform.remark"></el-input>
+					<el-input v-model="roleform.remark" type="textarea"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -43,22 +48,45 @@
 				roleform:{
 					roleId:'',
 					roleName:'',
-					remark:''
+					remark:'',
+					menuIds:[]
+				},
+				menuList:[],
+				defaultProps:{
+					label:'menuName',
+					children:'children',
+					disabled:(d,n)=>{
+						if(d.available){
+							return false
+						}else{
+							return true
+						}
+					}
 				},
 				selectRows:[],
-				selectRowsId:[]
+				selectRowsId:[],
+				pager:{
+					totalcount:0
+				}
 			}
 		},
 		mounted(){
-			this.getRoleList()
+			this.getList()
 		},
 		methods:{
-			getRoleList(){
+			getList(){
 				this.$http({
 					url:'/role/query?blurry='+this.querykey
 				}).then(res =>{
-					console.log(res)
-					this.roletable = res.list
+					// console.log(res.data)
+					this.roletable = res.data.list
+				})
+			},
+			pageChange(val){
+				this.$http({
+					url:'/role/query?blurry='+this.querykey+'&currentPage='+val
+				}).then(res=>{
+					this.roletable = res.data.list
 				})
 			},
 			keyReset(){
@@ -66,18 +94,30 @@
 			},
 			handleSelect(val){
 				this.selectRows = val
+				this.selectRowsId = val.map(function(v){return v.roleId})
+				console.log(this.selectRowsId)
+			},
+			menuInit(){
+				this.$http({
+					url:'/menu/tree'
+				}).then(res=>{
+					this.menuList = res.data
+				})
+				// this.isavial()
 			},
 			roleformReset(){
 				let role = {
 					roleId:'',
 					roleName:'',
-					remark:''
+					remark:'',
+					menuIds:[]
 				}
 				this.roleform = role
 			},
 			add(){
 				this.dialogTitle= "新增角色"
 				this.roleformReset()
+				this.menuInit()
 				this.dialog = true
 			},
 			edit(){
@@ -93,13 +133,18 @@
 					})
 				}else{
 					this.dialogTitle = '修改角色信息'
+					this.menuInit()
 					this.dialog = true
 					this.$http({url:'/role/info?roleId='+this.selectRows[0].roleId}).then(res=>{
-						this.roleform = res
+						this.roleform = res.data
+						this.$refs.menutree.setCheckedKeys(this.roleform.menuIds)
 					})
 				}
 			},
 			submit(){
+				this.roleform.menuIds = this.$refs.menutree.getCheckedKeys(false)
+				// let arr =  this.$refs.menutree.getCheckedNodes(false,true)
+				// this.roleform.menuIds = arr.map(function(v){return v.menuId})
 				let subUrl=''
 				if(this.dialogTitle=='新增角色'){
 					subUrl = '/role/add'
@@ -112,11 +157,11 @@
 					data:this.roleform
 				}).then(res =>{
 					this.$message({
-						message:'操作成功',
+						message:res.message,
 						type:'success'
 					})
 					this.dialog =false
-					this.getRoleList()
+					this.getList()
 				})
 			},
 			delet(){
@@ -126,21 +171,25 @@
 						message:'请至少选择一条删除项'
 					})
 				}else{
-					for(let i=0;i<arr.length;i++){
-						this.selectRowsId.push(arr[i].roleId)
-					}
-					this.$http({
-						url:'/role/delete',
-						method:'POST',
-						data:this.selectRowsId
-					}).then(res =>{
-						this.$message({
-							message:'操作成功',
-							type:'success'
+					this.$msgbox({
+						message:'确定是否删除?',
+						title:'消息',
+						showCancelButton:true,
+						// type:'warning'
+					}).then(()=>{
+						this.$http({
+							url:'/role/delete',
+							method:'POST',
+							data:this.selectRowsId
+						}).then(res =>{
+							this.$message({
+								message:res.message,
+								type:'success'
+							})
+							this.getList()
 						})
-						this.getRoleList()
-						this.selectRowsId = []
-					})
+					},()=>{})
+					
 				}
 			}
 		}

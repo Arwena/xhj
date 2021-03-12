@@ -11,7 +11,7 @@
 		<el-dialog title="修改密码" :visible.sync="pswdialog" >
 			<el-form :model="pswupdata" label-position="" :inline="true">
 				<el-form-item label="账号" class="full-line" label-width="120px">
-					<el-tag>管理员</el-tag>
+					<el-tag>{{accountN}}</el-tag>
 				</el-form-item>
 				<el-form-item label="原密码" label-width="120px">
 					<el-input v-model="pswupdata.oldPass"></el-input>
@@ -48,6 +48,7 @@
 			changePsw(){
 				this.pswdialog = true
 				//显示账号可以从session/vuex中保存获取， accountN
+				this.accountN = sessionStorage.getItem('acount')
 			},
 			updataPsw(){
 				this.$http({
@@ -55,7 +56,10 @@
 					method:'POST',
 					data:this.pswupdata
 				}).then(res =>{
-					console.log(res)
+					// console.log(res)
+					this.$message({
+						message:res.message
+					})
 				})
 			}
 		}

@@ -2,11 +2,11 @@
 	<div class="noth">
 		<div class="topbtn">
 			<el-input placeholder="请输入查询内容" v-model="querykey" clearable maxlength=300></el-input>
-			<el-button type="primary" round plain @click="getUserList">查询</el-button>
+			<el-button type="primary" round plain @click="getList">查询</el-button>
 			<el-button type="primary" round plain @click="keyReset">重置</el-button>
-			<el-button type="primary" round icon="el-icon-circle-plus-outline" style="margin-left: 40px;" @click="addUser">新增</el-button>
-			<el-button type="primary" round  icon="el-icon-edit" @click="editUser">编辑</el-button>
-			<el-button type="primary" round icon="el-icon-delete" @click="deleteUser">删除</el-button>
+			<el-button type="primary" round icon="el-icon-circle-plus-outline" style="margin-left: 40px;" @click="add">新增</el-button>
+			<el-button type="primary" round  icon="el-icon-edit" @click="edit">编辑</el-button>
+			<el-button type="primary" round icon="el-icon-delete" @click="delet">删除</el-button>
 		</div>
 		<el-table :data="usertable" border="" @selection-change="handleSelect">
 			<el-table-column type="index"></el-table-column>
@@ -27,7 +27,7 @@
 		<!-- 分页 -->
 		<el-pagination background layout="prev, pager,next" :total="pager.totalcount" :hide-on-single-page='true' @current-change="pageChange"></el-pagination>
 		<el-dialog :title="dialogTitle" :visible.sync="dialog">
-			<el-form :model="userform" :inline=true label-position='center'>
+			<el-form :model="userform" :inline='true' label-position='center'>
 				<el-form-item label="账号" label-width="120px">
 					<el-input v-model="userform.account" autocomplete="off"></el-input>
 				</el-form-item>
@@ -65,6 +65,7 @@
 
 <script>
 	export default {
+		
 		data(){
 			return{
 				usertable:[],  //列表展示
@@ -98,15 +99,15 @@
 			}
 		},
 		mounted(){
-			this.getUserList()
+			this.getList()
 		},
 		methods:{
-			getUserList(){
+			getList(){
 				this.$http({
 					url:'/user/query?blurry='+this.querykey
 				}).then(res=>{
-					this.usertable=res.list
-					this.pager.totalcount= res.totalCount
+					this.usertable=res.data.list
+					this.pager.totalcount= res.data.totalCount
 				})
 			},
 			initTime(r,c){
@@ -117,9 +118,9 @@
 				this.querykey = ''
 			},
 			dialogInit(){
-				this.$http({ url:'/role/select'}).then( res => {this.roleList = res})
+				this.$http({ url:'/role/select'}).then( res => {this.roleList = res.data})
 				this.$http({url:'/region/tree'}).then(res =>{
-					this.regionList = res 
+					this.regionList = res.data
 					this.$refs.treeadd.setCheckedKeys([])
 				})
 			},
@@ -138,24 +139,24 @@
 				this.userform = user
 			},
 			pageChange(val){
-				console.log(val)
 				this.$http({
 					url:'/user/query?blurry'+this.querykey+'currentPage='+val
 				}).then(res =>{
-					this.usertable=res.list
+					this.usertable=res.data.list
 				})
 			},
 			handleSelect(val){
 				this.selectRows = val
-				console.log(val)
+				this.selectRowsId = val.map(function(v,i,ar){return v.userId})
+				// console.log(this.selectRowsId)
 			},
-			addUser(){
+			add(){
 				this.dialogTitle= '新增用户'
 				this.dialog = true
 				this.dialogInit()
 				this.userformReset()
 			},
-			editUser(i){
+			edit(i){
 				if(this.selectRows.length == 0){
 					this.$message({
 						message:'请选择一条修改项',
@@ -173,7 +174,7 @@
 					this.$http({
 						url:'/user/info?userId='+this.selectRows[0].userId,
 						}).then(res=>{
-							this.userform = res
+							this.userform = res.data
 							this.$refs.treeadd.setCheckedKeys(this.userform.regionIds)
 						})
 				}
@@ -195,15 +196,15 @@
 				}).then(res =>{
 					//需要更改成功和失败的回调
 					this.$message({
-						message:'操作成功',
+						message:res.message,
 						type:'success'
 					})
 				
 					this.dialog = false
-					this.getUserList()
+					this.getList()
 				})
 			},
-			deleteUser(){
+			delet(){
 				//是否需要删除提示？？
 				let val = this.selectRows
 				if(val.length == 0){
@@ -211,21 +212,27 @@
 						message:'请至少选择一条删除项'
 					})
 				}else{
-					for(let i=0;i<val.length;i++){
-						this.selectRowsId.push(val[i].userId)
-					}
-					this.$http({
-						url:'/user/delete',
-						method:'POST',
-						data:this.selectRowsId
-					}).then(res=>{
-						this.$message({
-							message:'操作成功',
-							type:'success'
+					this.$msgbox({
+						message:'确定是否删除?',
+						title:'消息',
+						showCancelButton:true,
+						// type:'warning'
+					}).then(()=>{
+						this.$http({
+							url:'/user/delete',
+							method:'POST',
+							data:this.selectRowsId
+						}).then(res=>{
+							this.$message({
+								message:res.message,
+								type:'success'
+							})
+							this.getList()
 						})
-						this.getUserList()
-						this.selectRowsId = []
+					} ).catch(()=>{
+						
 					})
+					
 				}
 				
 			}

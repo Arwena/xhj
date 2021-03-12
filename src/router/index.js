@@ -26,14 +26,14 @@ const routes = [
 			name:'First'
 		},
 		children:[
-			{
-			  path: '/about',
-			  name: 'About',
-			  // route level code-splitting
-			  // this generates a separate chunk (about.[hash].js) for this route
-			  // which is lazy-loaded when the route is visited.
-			  component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-			},
+			// {
+			//   path: '/about',
+			//   name: 'About',
+			//   // route level code-splitting
+			//   // this generates a separate chunk (about.[hash].js) for this route
+			//   // which is lazy-loaded when the route is visited.
+			//   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+			// },
 			{
 			  path:'/first',
 			  name:'First',
@@ -80,6 +80,19 @@ const routes = [
 			component:() => import('../views/system/log.vue')
 		}
 	]
+  },
+  {
+	  path:"/road",
+	  name:'Road',
+	  component:()=> import('@/views/Home.vue'),
+	  redirect:{
+		  name:'roadList'
+	  },
+	  children:[{
+		  path:'/road/list',
+		  name:'roadList',
+		  component:() => import('@/views/basics/roadmanage/list.vue')
+	  }]
   }
 ]
 //相同路径跳转报错

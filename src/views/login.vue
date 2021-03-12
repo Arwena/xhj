@@ -63,7 +63,8 @@
 						"password": this.ruleForm.pass
 					}
 				}).then(res=>{
-					sessionStorage.setItem("token",res.token)
+					sessionStorage.setItem("token",res.data.token)
+					sessionStorage.setItem('acount',res.data.userName)
 					// this.$root.token = res.token
 					this.$router.push({name: 'Home'})
 				})

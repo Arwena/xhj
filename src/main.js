@@ -16,11 +16,6 @@ Vue.config.productionTip = false
 
 
 new Vue({
-  data(){
-	  return{
-		  token:''
-	  }
-  },
   router,
   store,
   render: h => h(App)

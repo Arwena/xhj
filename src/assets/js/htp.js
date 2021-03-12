@@ -43,7 +43,7 @@ const htpreq = {
 				baseURL:baseurl,
 				timeout:10000,
 				async:opt.async || true,
-				
+				params:opt.params ||{},
 				headers:opt.headers || {
 					"Content-Type": 'application/json; charset=utf-8',
 					'Authorization': sessionStorage.getItem('token') || null
@@ -53,7 +53,7 @@ const htpreq = {
 				let res = response.data
 				console.log(res)
 				if(res.status == 200){
-					resolve(res.data)
+					resolve(res)
 				}
 			}).catch(err =>{
 				console.log(err)
@@ -73,7 +73,7 @@ const htpreq = {
 				}else{
 					// console.log("403是未授权被禁止，跳转到首页")
 					MessageBox({
-						message:'未被授权，禁止访问',
+						message:err.message,
 						type:'error',
 						confirmButtonText:'确定',
 						callback:action =>{
