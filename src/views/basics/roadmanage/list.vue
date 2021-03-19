@@ -8,17 +8,124 @@
 			<el-button type="primary" round  icon="el-icon-edit" @click="edit">编辑</el-button>
 			<el-button type="primary" round icon="el-icon-delete" @click="delet">删除</el-button>
 		</div>
-		<div style="display: flex; height: 699px;" class="">
-			<el-tree :data="regionList" node-key="regionId" ref="tree" show-checkbox="" :props="defaultProps"></el-tree>
-			<el-table :data="tableList" border >
+		<div style="overflow: hidden;" class="">
+			<el-tree :data="regionList" 
+					node-key="regionId" ref="tree" show-checkbox="" 
+					:props="defaultProps" @check="regionCheck"
+					:default-checked-keys="regionId" default-expand-all>
+				
+			</el-tree>
+			<el-table :data="tableList" border max-height="699" @selection-change="roadChange">
 				<el-table-column type="index"></el-table-column>
-				<!-- <el-table-column type="selection" align="center"></el-table-column> -->
+				<el-table-column type="selection" align="center" width="50"></el-table-column>
 				<el-table-column label="路口别名" prop="crossAlias" width="150"></el-table-column>
 				<el-table-column label="路口编号" prop="crossId" width="100"></el-table-column>
 				<el-table-column label="路口名称" prop="crossName" width="150"></el-table-column>
-				<el-table-column label="路口" prop="feature"></el-table-column>
+				<el-table-column label="路口类型" prop="feature" width="150"></el-table-column>
+				<el-table-column label="信号机" prop="signalControllerName" width="200"></el-table-column>
+				<el-table-column label="备注" prop="remark" width="250"></el-table-column>
+				<el-table-column label="操作"  width="">
+					<template slot-scope="handle">
+						<el-link type="primary">路口设置</el-link>
+						<el-link type="primary" @click="videoSetting">视频设置</el-link>
+					</template>
+				</el-table-column>
 			</el-table>
 		</div>
+		<el-pagination background="" layout="prev, pager,next"></el-pagination>
+		<el-dialog :title="dialogTitle" :visible.sync="dialog">
+			<el-form :model="roadform" :inline="true" >
+				<el-form-item label="路口名称" label-width="120px">
+					<el-input v-model="roadform.crossName" ></el-input>
+				</el-form-item>
+				<el-form-item label="路口别名" label-width="120px">
+					<el-input v-model="roadform.crossAlias"></el-input>
+				</el-form-item>
+				<el-form-item label="所属区域" label-width="120px">
+					<el-select v-model="roadform.regionId">
+						<el-option v-for="item in regionMap" :key="item.regionId" :label="item.regionName" :value="item.regionId"></el-option>
+					</el-select>
+					
+				</el-form-item>
+				<el-form-item label="道路类型" label-width="120px">
+					<el-select v-model="roadform.feature" placeholder="请选择道路类型">
+						<el-option v-for="item in feaList" :key="item.value" :value="item.description"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="信号机" label-width="120px">
+					<el-select v-model="roadform.signalControllerId">
+						<el-option v-for="item in signalContList" :key="item.signalControllerId" :label="item.signalControllerName"
+						:value="item.signalControllerId"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="GPS" label-width="120px">
+					<el-input>
+						<el-button slot="append">查看地图</el-button>
+					</el-input>
+				</el-form-item>
+				<el-form-item label="备注" label-width="120px">
+					<el-input type="textarea" v-model="roadform.remark"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click="dialog = false">取消</el-button>
+				<el-button type="primary">保存</el-button>
+			</div>
+		</el-dialog>
+		<el-dialog title="路口视频列表" :visible.sync="videodia">
+			<div style="overflow: hidden;">
+				<span style="float: left;">路口名称:{{curRoad}}</span>
+				<div style="float: right;">
+					<el-button type="success" icon="el-icon-plus" circle @click = "addCam"></el-button>
+					<el-button type="primary" icon="el-icon-edit" circle @click ="editCam"></el-button>
+					<el-button type="danger" icon="el-icon-delete" circle @click = "delCam"></el-button>
+				</div>
+			</div >
+			<div style="overflow: hidden;">
+				<span style="float: left;">视频相机</span>
+				<el-table :data="cameralist" border @selection-change="camChange" >
+					<el-table-column type="selection"></el-table-column>
+					<el-table-column label="道路名" prop="roadName"></el-table-column>
+					<el-table-column label="方向" prop="toward"></el-table-column>
+					<el-table-column label="相机品牌" prop="brand"></el-table-column>
+					<el-table-column label="相机型号" prop="model"></el-table-column>
+				</el-table>
+			</div>
+		</el-dialog>
+		<el-dialog title="视频相机信息" :visible.sync="vInfoDia">
+			<p>路口名称:{{curRoad}}</p>
+			<el-form :model="camform" :inline="true">
+				<el-form-item label="道路名称" label-width="120px">
+					<el-input v-model="camform.roadName"></el-input>
+				</el-form-item>
+				<el-form-item label="方向" label-width="120px">
+					<el-select v-model="camform.toward">
+						<el-option v-for="item in towardList" :key="item.name" :value="item.name"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="相机品牌" label-width="120px">
+				</el-form-item>
+				<el-form-item label="相机型号" label-width="120px">
+					<el-input v-model="camform.model"></el-input>
+				</el-form-item>
+				<el-form-item label="相机IP" label-width="120px">
+					<el-input v-model="camform.ipAddress"></el-input>
+				</el-form-item>
+				<el-form-item label="IP端口" label-width="120px">
+					<el-input v-model="camform.port"></el-input>
+				</el-form-item>
+				<el-form-item label="登录ID" label-width="120px">
+					<el-input v-model="camform.loginAccount"></el-input>
+				</el-form-item>
+				<el-form-item label="登录口令" label-width="120px">
+					<el-input v-model="camform.loginPassword"></el-input>
+				</el-form-item>
+				<el-divider></el-divider>
+				<el-form-item label="参数1" label-width="120px">
+					
+				</el-form-item>
+			</el-form>
+		</el-dialog>
 	</div>
 </template>
 
@@ -27,7 +134,7 @@
 		data(){
 			return{
 				querykey:'',
-				regionList:[],
+				regionList:[], 
 				defaultProps:{
 					children:'children',
 					label:'regionName',
@@ -39,8 +146,41 @@
 						}
 					}
 				},
-				tableList:[],
-				regionId:''
+				tableList:[],  //路口列表
+				roadRows:[],
+				roadRowsId:[],
+				regionId:[],   //路口列表条件查询ID
+				dialog:false,
+				dialogTitle:'',
+				roadform:{             //新增路口对话框
+					crossName:'',
+					crossAlias:'',
+					regionId:'',
+					feature:'',
+					remark:'',
+					signalControllerId:''
+				},
+				signalContList:[],     //信号机列表
+				feaList:[],           //路口类型列表
+				regionMap:[],           //绑定所属区域列表
+				videodia:false,
+				cameralist:[],         //相机列表
+				curRoad:'',
+				vInfoDia:false,
+				camRows:[],
+				camRowsId:[],
+				camform:{              //相机对话框
+					roadName:'',
+					toward:'',
+					brand:'',
+					model:'',
+					ipAddress:'',
+					port:null,
+					loginAccount:'',
+					loginPassword:''
+				},
+				brandlist:[],           //品牌列表
+				towardList:[]          //方向列表
 			}
 		},
 		mounted(){
@@ -48,38 +188,101 @@
 		},
 		methods:{
 			getList(){
-				console.log("await")
 				this.$http({
 					url:'/cross/query',
-					params:{
+					method:'POST',
+					data:{
 						blurry:this.querykey,
-						regionId:this.regionId
+						regionIds:this.regionId
 					}
 				}).then(res =>{
 					this.tableList = res.data.list
 				})
 			},
+			// 初始化区域树
 			initTree(){
 				this.$http({
 					url:'/cross/tree'
 				}).then(res =>{
 					this.regionList = res.data.tree
-					this.regionId = res.data.firstAvailableRegionId
+					this.regionId.push( res.data.firstAvailableRegionId)
 					console.log(this.regionId)
 					this.getList()
 					// this.$refs.tree.setCheckedKey([])
 				})
 			},
+			// 区域树点选处理
+			regionCheck(d,c){
+				// console.log(d,c)
+				if(c.checkedKeys.length == 0){
+					this.regionId = []
+				}else{
+					this.regionId = c.checkedKeys
+				}
+				this.getList()
+			},
+			// 路口列表点选处理
+			roadChange(val){
+				this.roadRows = val
+				this.roadRowsId = val.map(function(v){return v.crossId})
+			},
+			// 模糊查询重置
 			keyReset(){
-				
+				this.querykey = ''
 			},
+			// 初始化新增对话框
+			initdialog(){
+				this.$http({url:'/cross/getCrossFeatureList'}).then(res =>{this.feaList = res.data})
+				this.$http({url:'/region/getRegionMap'}).then(res=>{this.regionMap = res.data})
+				this.$http({url:'/signalController/getSignalControllerMap'}).then(res=>{this.signalContList = res.data})
+			},
+			// 新增
 			add(){
-				
+				this.dialog = true
+				this.dialogTitle = '新增路口'
+				this.initdialog()
 			},
+			// 编辑
 			edit(){
 				
 			},
 			delet(){
+				
+			},
+			videoSetting(){
+				if(this.roadRowsId.length == 1){
+					this.curRoad = this.roadRows[0].crossAlias
+					this.videodia = true
+					this.$http({
+						url:'/videoCamera/query',
+						params:{
+							crossId:this.roadRowsId[0]
+						}
+					}).then(res =>{
+						this.cameralist = res.data
+					})
+				}else{
+					this.$message({
+						message:'请选择当前路口',
+						type:'warning'
+					})
+				}
+				
+			},
+			camChange(val){
+				this.camRows = val
+				this.camRowsId = val.map(function(v){return v.cameraNo})
+			},
+			// 新增相机
+			addCam(){
+				this.vInfoDia = true
+			},
+			// 修改相机
+			editCam(){
+				
+			},
+			// 删除相机
+			delCam(){
 				
 			}
 			
@@ -87,21 +290,49 @@
 	}
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 	
 	.el-tree{
+		float: left;
 		width: 250px;
-		height: 100%;
+		height: 699px;
 		background: none;
 		padding: 10px;
-		margin-right: 10px;
-		margin-top: 30px;
+		// margin-right: 10px;
+		// margin-top: 30px;
 		margin: 30px 10px 0 10px;
 		// overflow: scroll;
 		background: #024f88;
 		color: #fff;
-		.el-tree-node__content:hover{
-			background-color:#0a4978;
+		
+	}
+	.el-table{
+		float: right;
+		margin-right: 10px;
+		max-width: 81%;
+		max-height: 600px;
+		.el-link{
+			margin:0 5px;
+		}
+	}
+</style>
+<style lang="less">
+	.el-tree-node__content:hover{
+		background-color:#0a4978;
+	}
+	.el-tree-node:focus>.el-tree-node__content{
+		background-color:#0a4978;
+	}
+	
+	.el-dialog {
+		.el-table {
+			color: #333;
+			margin-top:10px ;
+			max-width: 90%!important;
+			.el-table__body tr:hover >td{
+					background: #ecf5ff!important;
+				}
+			
 		}
 	}
 </style>

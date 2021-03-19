@@ -8,7 +8,7 @@
 			<el-button type="primary" round icon="el-icon-edit" @click="edit">编辑</el-button>
 			<el-button type="primary" round icon="el-icon-delete" @click="delet">删除</el-button>
 		</div>
-		<el-table :data="dicList" border @expand-change="load" max-height="699">
+		<el-table :data="dicList" border @expand-change="load" max-height="699" ref="dicty">
 			<el-table-column type="expand">
 				<template slot-scope="scope">
 					<el-table :data="dicInfoList" @selection-change="handleSelect" border="">
@@ -99,12 +99,18 @@
 				})
 			},
 			load(r,exrow){
-				console.log(r,exrow)
-				this.$http({
-					url:'/dict/info/query?dictType='+r.dictType
-				}).then(res =>{
-					this.dicInfoList = res.data
-				})
+				// console.log(r,exrow)
+				// if(exrow.length == 1){
+					// console.log(exrow)
+					this.$http({
+						url:'/dict/info/query?dictType='+r.dictType
+					}).then(res =>{
+						this.dicInfoList = res.data
+					})
+				// }else if(exrow.length == 2){
+				// 	this.$refs.dicty.toggleRowExpansion(exrow[0])
+				// 	return
+				// }
 			},
 			handleSelect(val){
 				this.selectRows = val

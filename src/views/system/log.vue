@@ -19,22 +19,22 @@
 				<template slot-scope ="scope">
 					<el-popover trigger="click" width="300">
 						<p>{{scope.row.params}}</p>
-						<el-button slot="reference" type="primary" round>查看详情</el-button>
+						<el-button slot="reference" type="primary" round >查看详情</el-button>
 					</el-popover>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" v-if="errorIs" label="错误描述" prop="errorDetails" width="200">
+			<el-table-column align="center" v-if="currentUrl == '/log/error/query'" label="错误描述" prop="errorDetails" width="200">
 				<template slot-scope="scope">
 					<el-popover width="600" trigger="click">
 						<el-scrollbar style="width: 100%; height: 100%;">
 							<p class="foldes">{{scope.row.errorDetails}}</p>
 						</el-scrollbar>
-						<el-button slot="reference" type="success" round>查看详情</el-button>
+						<el-button slot="reference" type="success" round >查看详情</el-button>
 					</el-popover>
 				</template>
 			</el-table-column>
 		</el-table>
-		<el-pagination :current-page.sync="pager.currentPage" :hide-on-single-page="true" :total="pager.totalcount" background layout="prev,pager,next" @current-change="pageChange">
+		<el-pagination :current-page="pager.currentPage" :hide-on-single-page="true" :total="pager.totalcount" background layout="prev,pager,next" @current-change="pageChange">
 			
 		</el-pagination>
 	</div>
