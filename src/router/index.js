@@ -88,11 +88,18 @@ const routes = [
 	  redirect:{
 		  name:'roadList'
 	  },
-	  children:[{
-		  path:'/road/list',
-		  name:'roadList',
-		  component:() => import('@/views/basics/roadmanage/list.vue')
-	  }]
+	  children:[
+		  {
+			  path:'/road/list',
+			  name:'roadList',
+			  component:() => import('@/views/basics/roadmanage/list.vue')
+		  },
+		  {
+			 path:'/road/croseting',
+			 name:'crosSeting',
+			 component:() => import('@/views/basics/roadmanage/croseting.vue')
+		  }
+	  ]    
   }
 ]
 //相同路径跳转报错

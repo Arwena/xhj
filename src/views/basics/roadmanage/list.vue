@@ -21,12 +21,12 @@
 				<el-table-column label="路口别名" prop="crossAlias" width="150"></el-table-column>
 				<el-table-column label="路口编号" prop="crossId" width="100"></el-table-column>
 				<el-table-column label="路口名称" prop="crossName" width="150"></el-table-column>
-				<el-table-column label="路口类型" prop="feature" width="150"></el-table-column>
+				<el-table-column label="路口类型" prop="feature" width="150" :formatter="roadtypeInit"></el-table-column>
 				<el-table-column label="信号机" prop="signalControllerName" width="200"></el-table-column>
 				<el-table-column label="备注" prop="remark" width="250"></el-table-column>
 				<el-table-column label="操作"  width="">
 					<template slot-scope="handle">
-						<el-link type="primary">路口设置</el-link>
+						<el-link type="primary" @click="roadSetting">路口设置</el-link>
 						<el-link type="primary" @click="videoSetting">视频设置</el-link>
 					</template>
 				</el-table-column>
@@ -35,6 +35,9 @@
 		<el-pagination background="" layout="prev, pager,next"></el-pagination>
 		<el-dialog :title="dialogTitle" :visible.sync="dialog">
 			<el-form :model="roadform" :inline="true" >
+				<el-form-item label="路口ID" label-width="120px">
+					<el-input v-model="roadform.crossId"></el-input>
+				</el-form-item>
 				<el-form-item label="路口名称" label-width="120px">
 					<el-input v-model="roadform.crossName" ></el-input>
 				</el-form-item>
@@ -43,13 +46,12 @@
 				</el-form-item>
 				<el-form-item label="所属区域" label-width="120px">
 					<el-select v-model="roadform.regionId">
-						<el-option v-for="item in regionMap" :key="item.regionId" :label="item.regionName" :value="item.regionId"></el-option>
+						<el-option v-for="item in regionMap" :key="item.regionId" :value="item.regionId" :label="item.regionName"></el-option>
 					</el-select>
-					
 				</el-form-item>
 				<el-form-item label="道路类型" label-width="120px">
 					<el-select v-model="roadform.feature" placeholder="请选择道路类型">
-						<el-option v-for="item in feaList" :key="item.value" :value="item.description"></el-option>
+						<el-option v-for="item in feaList" :key="item.value" :value="item.value" :label="item.description"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="信号机" label-width="120px">
@@ -64,12 +66,12 @@
 					</el-input>
 				</el-form-item>
 				<el-form-item label="备注" label-width="120px">
-					<el-input type="textarea" v-model="roadform.remark"></el-input>
+					<el-input  v-model="roadform.remark"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialog = false">取消</el-button>
-				<el-button type="primary">保存</el-button>
+				<el-button type="primary" @click="subRoad">保存</el-button>
 			</div>
 		</el-dialog>
 		<el-dialog title="路口视频列表" :visible.sync="videodia">
@@ -85,28 +87,40 @@
 				<span style="float: left;">视频相机</span>
 				<el-table :data="cameralist" border @selection-change="camChange" >
 					<el-table-column type="selection"></el-table-column>
-					<el-table-column label="道路名" prop="roadName"></el-table-column>
-					<el-table-column label="方向" prop="toward"></el-table-column>
 					<el-table-column label="相机品牌" prop="brand"></el-table-column>
 					<el-table-column label="相机型号" prop="model"></el-table-column>
+					<el-table-column label="道路名" prop="roadName"></el-table-column>
+					<el-table-column label="方向" prop="toward"></el-table-column>
 				</el-table>
 			</div>
 		</el-dialog>
 		<el-dialog title="视频相机信息" :visible.sync="vInfoDia">
-			<p>路口名称:{{curRoad}}</p>
-			<el-form :model="camform" :inline="true">
-				<el-form-item label="道路名称" label-width="120px">
-					<el-input v-model="camform.roadName"></el-input>
+			<p style="text-align: left; text-indent: 80px; line-height: 40px; color: #000000;">路口名称:{{curRoad}}</p>
+			<el-form :model="camform" :inline="true" label-position="center">
+				<el-form-item label="路口ID" label-width="120px">
+					<el-input v-model="camform.crossId" disabled=""></el-input>
 				</el-form-item>
-				<el-form-item label="方向" label-width="120px">
+				<el-form-item label="关联道路" label-width="120px">
+					<!-- <el-input v-model="camform.roadName"></el-input> -->
+					<el-select v-model="camform.roadNo">
+						<el-option v-for="item in roadList" :key="item.roadNo" :value="item.roadNo" :label="item.roadName"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="相机指向" label-width="120px">
 					<el-select v-model="camform.toward">
-						<el-option v-for="item in towardList" :key="item.name" :value="item.name"></el-option>
+						<el-option v-for="item in towardList" :key="item.dictInfo" :value="item.dictInfoName"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="相机品牌" label-width="120px">
+					<el-select v-model="camform.brand">
+						<el-option v-for="item in brandlist" :key="item.dictInfo" :value="item.dictInfoName" ></el-option>
+					</el-select>
 				</el-form-item>
 				<el-form-item label="相机型号" label-width="120px">
 					<el-input v-model="camform.model"></el-input>
+				</el-form-item>
+				<el-form-item label="相机序号" label-width="120px">
+					<el-input v-model="camform.cameraNo"></el-input>
 				</el-form-item>
 				<el-form-item label="相机IP" label-width="120px">
 					<el-input v-model="camform.ipAddress"></el-input>
@@ -121,10 +135,20 @@
 					<el-input v-model="camform.loginPassword"></el-input>
 				</el-form-item>
 				<el-divider></el-divider>
-				<el-form-item label="参数1" label-width="120px">
-					
+				<el-form-item v-for="(item,index) in 10 " :label="'参数'+item" label-width="120px">
+					<el-input v-model="codeParams[index]"></el-input>
+				</el-form-item>
+				<el-form-item label="API代码" label-width="120px">
+					<el-input type="textarea" v-model="camform.jsCode"></el-input>
+				</el-form-item>
+				<el-form-item label="备注" label-width="120px">
+					<el-input type="textarea" v-model="camform.remark"></el-input>
 				</el-form-item>
 			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click="vInfoDia = false">取消</el-button>
+				<el-button type="primary" @click="subvInfo">保存</el-button>
+			</div>
 		</el-dialog>
 	</div>
 </template>
@@ -147,12 +171,13 @@
 					}
 				},
 				tableList:[],  //路口列表
-				roadRows:[],
-				roadRowsId:[],
+				roadRows:[],             //路口选中行
+				roadRowsId:[],           // 选中行ID
 				regionId:[],   //路口列表条件查询ID
 				dialog:false,
 				dialogTitle:'',
 				roadform:{             //新增路口对话框
+					crossId:'',
 					crossName:'',
 					crossAlias:'',
 					regionId:'',
@@ -166,19 +191,28 @@
 				videodia:false,
 				cameralist:[],         //相机列表
 				curRoad:'',
-				vInfoDia:false,
-				camRows:[],
+				vInfoDia:false,        //对话框
+				isaddInfo:false,       //判断是否是新增信息对话框
+				camRows:[],           
 				camRowsId:[],
 				camform:{              //相机对话框
+					crossId:'',
+					cameraNo:'',
 					roadName:'',
+					roadNo:'',
 					toward:'',
 					brand:'',
 					model:'',
 					ipAddress:'',
 					port:null,
 					loginAccount:'',
-					loginPassword:''
+					loginPassword:'',
+					codeParams:'',
+					jsCode:'',
+					remark:''
 				},
+				roadList:[],
+				codeParams:[],
 				brandlist:[],           //品牌列表
 				towardList:[]          //方向列表
 			}
@@ -208,8 +242,14 @@
 					this.regionId.push( res.data.firstAvailableRegionId)
 					console.log(this.regionId)
 					this.getList()
+					this.initdialog()
 					// this.$refs.tree.setCheckedKey([])
 				})
+			},
+			//路口类型初始化
+			roadtypeInit(r,c){
+				let data = this.feaList.filter(function(i){return i.value == r.feature})
+				return data[0].description
 			},
 			// 区域树点选处理
 			regionCheck(d,c){
@@ -232,34 +272,130 @@
 			},
 			// 初始化新增对话框
 			initdialog(){
+				// 路口对话框
 				this.$http({url:'/cross/getCrossFeatureList'}).then(res =>{this.feaList = res.data})
 				this.$http({url:'/region/getRegionMap'}).then(res=>{this.regionMap = res.data})
 				this.$http({url:'/signalController/getSignalControllerMap'}).then(res=>{this.signalContList = res.data})
+				// 视频对话框
+				this.$http({
+					url:'/dict/info/query',
+					params:{
+						dictType:'roadDirection'
+					}
+					}).then(res=>{this.towardList = res.data})
+				this.$http({
+					url:'/dict/info/query',
+					params:{
+						dictType:'videoBrand'
+					}
+					}).then(res=>{this.brandlist = res.data})
 			},
 			// 新增
 			add(){
 				this.dialog = true
 				this.dialogTitle = '新增路口'
-				this.initdialog()
+				Object.assign(this.$data.roadform,this.$options.data().roadform)
+				
 			},
 			// 编辑
 			edit(){
-				
-			},
-			delet(){
-				
-			},
-			videoSetting(){
-				if(this.roadRowsId.length == 1){
-					this.curRoad = this.roadRows[0].crossAlias
-					this.videodia = true
+				if(this.roadRows.length == 0){
+					this.$message({
+						message:'请选择一条修改项',
+						type:'warning'
+					})
+				}else if(this.roadRows >1){
+					this.$message({
+						message:'只能选择一条修改',
+						type:'error'
+					})
+				}else{
+					this.dialogTitle = '编辑路口'
+					this.dialog = true
+					// this.initdialog()
 					this.$http({
-						url:'/videoCamera/query',
+						url:'/cross/info',
 						params:{
 							crossId:this.roadRowsId[0]
 						}
 					}).then(res =>{
-						this.cameralist = res.data
+						this.roadform = res.data
+					})
+				}
+				
+			},
+			delet(){
+				let v = this.roadRows
+				if(v.length == 0 ){
+					this.$message({
+						message:'请至少选择一条删除项'
+					})
+				}else{
+					this.$msgbox({
+						message:'确定是否删除？',
+						title:'消息',
+						showCancelButton:true
+					}).then(()=>{
+						this.$http({
+							url:'/cross/delete',
+							method:'post',
+							data:this.roadRowsId
+						}).then(res=>{
+							this.$message({
+								message:res.message,
+								type:'success'
+							})
+							this.getList()
+						})
+					})
+				}
+			},
+			subRoad(){
+				let subUrl = ''
+				if(this.dialogTitle =='新增路口'){
+					subUrl = '/cross/add'
+				}else{
+					subUrl = '/cross/update'
+				}
+				this.$http({
+					url:subUrl,
+					data:this.roadform,
+					method:'POST'
+				}).then(res=>{
+					this.$message({
+						message:res.message,
+						type:'success'
+					})
+					this.dialog = false
+					this.getList()
+				})
+			},
+			//获取视频列表
+			getcamList(){
+				this.$http({
+					url:'/videoCamera/query',
+					params:{
+						crossId:this.roadRowsId[0]
+					}
+				}).then(res =>{
+					this.cameralist = res.data
+				})
+			},
+			//视频设置
+			videoSetting(){
+				if(this.roadRowsId.length == 1){
+					this.curRoad = this.roadRows[0].crossAlias
+					this.videodia = true
+					//请求相机列表
+					this.getcamList()
+					//请求路口道路列表
+					this.$http({
+						url:'/road/getRoadMap',
+						params:{
+							crossId:this.roadRowsId[0]
+						}
+					}).then(res=>{
+						this.roadList = res.data
 					})
 				}else{
 					this.$message({
@@ -269,21 +405,99 @@
 				}
 				
 			},
+			// 视频相机表格选中切换
 			camChange(val){
 				this.camRows = val
-				this.camRowsId = val.map(function(v){return v.cameraNo})
+				this.camRowsId = val.map(function(v){return {'cameraNo':v.cameraNo,'crossId':v.crossId}})
 			},
 			// 新增相机
 			addCam(){
-				this.vInfoDia = true
+				Object.assign(this.$data.camform,this.$options.data().camform)
+				this.camform.crossId = this.roadRowsId[0]
+				if(this.roadList.length == 0){
+					this.$message({
+						message:'暂无道路，请先设置道路',
+						type:'warning'
+					})
+				}else{
+					this.vInfoDia = true
+					this.isaddInfo = true
+				}
 			},
 			// 修改相机
 			editCam(){
-				
+				if(this.camRows.length ==0 || this.camRows.length >1){
+					this.$message({
+						message:'请选择一条修改项',
+						type:'warning'
+					})
+				}else{
+					this.isaddInfo = false
+					this.vInfoDia = true
+					this.$http({
+						url:'/videoCamera/info',
+						params:{
+							cameraNo:this.camRows[0].cameraNo,
+							crossId:this.camRows[0].crossId
+						}
+					}).then(res=>{
+						this.camform = res.data
+						this.codeParams = this.camform.codeParams.split('%#',10)
+					})
+				}
 			},
 			// 删除相机
 			delCam(){
-				
+				let v = this.camRows
+				if(v.length == 0 ){
+					this.$message({
+						message:'请至少选择一条删除项'
+					})
+				}else{
+					this.$msgbox({
+						message:'确定是否删除？',
+						title:'消息',
+						showCancelButton:true
+					}).then(()=>{
+						this.$http({
+							url:'/videoCamera/delete',
+							method:'post',
+							data:this.camRowsId
+						}).then(res=>{
+							this.$message({
+								message:res.message,
+								type:'success'
+							})
+							this.getcamList()
+						})
+					})
+				}
+			},
+			//提交视频相机信息表单
+			subvInfo(){
+				let subUrl = ''
+				if(this.isaddInfo){
+					subUrl = '/videoCamera/add'
+				}else{
+					subUrl = '/videoCamera/update'
+				}
+				this.camform.codeParams = this.codeParams.join('%#')
+				this.$http({
+					url:subUrl,
+					data:this.camform,
+					method:'POST'
+				}).then(res =>{
+					this.$message({
+						message:res.message,
+						type:'success'
+					})
+					this.vInfoDia = false
+					this.getcamList()
+				})
+			},
+			//路口设置跳转
+			roadSetting(){
+				this.$router.push({name:'crosSeting'})
 			}
 			
 		}

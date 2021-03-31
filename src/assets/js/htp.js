@@ -12,7 +12,6 @@ let er = {
 axios.interceptors.response.use(
     response => {
         const res = response.data
-		console.log(res)
         if (res && res.status !=200) {
 			if(res.status ===401){
 				sessionStorage.setItem('token','')
@@ -47,7 +46,7 @@ axios.interceptors.response.use(
 		if(!er.tokenerr && !er.neterr && !er.otherr){
 			return Promise.reject(error)
 		}else{
-			return "cancle"
+			return Promise.resolve(error)
 		}
     }
 )
@@ -68,13 +67,15 @@ const htpreq = {
 				},
 				data:opt.data || null
 			}).then( response=>{
-				let res = response.data
-				console.log(res)
-				if(res.status == 200){
-					resolve(res)
+				if(response.status != 200){
+					return
+				}else{
+					let res = response.data
+					if(res.status == 200){
+						resolve(res)
+					}
 				}
 			}).catch(err =>{
-				console.log(err)
 				if(err =='Error: Request failed with status code 401'){
 					er.tokenerr =true
 					MessageBox({

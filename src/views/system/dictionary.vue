@@ -100,17 +100,17 @@
 			},
 			load(r,exrow){
 				// console.log(r,exrow)
-				// if(exrow.length == 1){
+				if(exrow.length == 1){
 					// console.log(exrow)
 					this.$http({
-						url:'/dict/info/query?dictType='+r.dictType
+						url:'/dict/info/query?dictType='+exrow[0].dictType
 					}).then(res =>{
 						this.dicInfoList = res.data
 					})
-				// }else if(exrow.length == 2){
-				// 	this.$refs.dicty.toggleRowExpansion(exrow[0])
-				// 	return
-				// }
+				}else if(exrow.length == 2){
+					this.$refs.dicty.toggleRowExpansion(exrow[0])
+					return
+				}
 			},
 			handleSelect(val){
 				this.selectRows = val
