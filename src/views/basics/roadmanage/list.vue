@@ -497,7 +497,7 @@
 			},
 			//路口设置跳转
 			roadSetting(){
-				this.$router.push({name:'crosSeting'})
+				this.$router.push({name:'rSetting'})
 			}
 			
 		}

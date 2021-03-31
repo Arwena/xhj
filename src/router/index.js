@@ -95,10 +95,26 @@ const routes = [
 			  component:() => import('@/views/basics/roadmanage/list.vue')
 		  },
 		  {
-			 path:'/road/croseting',
-			 name:'crosSeting',
-			 component:() => import('@/views/basics/roadmanage/croseting.vue')
+			  path:'road/setting',
+			  name:'rSetting',
+			  component:() => import('@/views/basics/roadmanage/roadsetting.vue'),
+			  redirect:{
+				name:'crosSeting'
+			  },
+			  children:[
+				  {
+				  			 path:'/road/croseting',
+				  			 name:'crosSeting',
+				  			 component:() => import('@/views/basics/roadmanage/croseting.vue')
+				  },
+				  {
+				  			  path:'/road/laneseting',
+				  			  name:'laneSeting',
+				  			  component:()=> import('@/views/basics/roadmanage/laneseting.vue')
+				  }
+			  ]
 		  }
+		  
 	  ]    
   }
 ]

@@ -1,27 +1,31 @@
 <template>
-	<div class="noth">
+	<div>
+		<!-- 路口设置第一步 -->
 		<div class="svg-contain" id="r-setting">
-			<input type="checkbox" name="r0" style="left: 60px; top: 290px;"/>
+			<input type="checkbox" name="r0" value="r0" style="left: 60px; top: 290px;" v-model="roads"/>
 			<div class="road r0"></div>
-			<input type="checkbox" name="r180" style="left: 520px; top: 290px;"/>
+			<input type="checkbox" value="r180" style="left: 520px; top: 290px;" v-model="roads"/>
 			<div class="road r180"></div>
-			<input type="checkbox" name="r90" style="top: 60px;left: 290px;"/>
+			<input type="checkbox" value="r90" style="top: 60px;left: 290px;" v-model="roads"/>
 			<div class="road r90"></div>
-			<input type="checkbox" name="r270" style="top: 520px;left: 290px;"/>
+			<input type="checkbox" value="r270" style="top: 520px;left: 290px;" v-model="roads"/>
 			<div class="road r270" key='r270'></div>
-			<input type="checkbox" name="r45" style="left: 125px; top: 125px;"/>
+			<input type="checkbox" value="r45" style="left: 125px; top: 125px;" v-model="roads"/>
 			<div class="road r45" ></div>
-			<input type="checkbox" name="r225" style="left: 455px; top:455px"/>
+			<input type="checkbox" value="r225" style="left: 455px; top:455px" v-model="roads"/>
 			<div class="road r225" ></div>
-			<input type="checkbox" name="r135"style="left:455px; top: 125px;"/>
+			<input type="checkbox" value="r135" style="left:455px; top: 125px;" v-model="roads"/>
 			<div class="road r135"  ></div>
-			<input type="checkbox" name="r315"  style="left: 125px; top:455px;"/>
+			<input type="checkbox" value="r315"  style="left: 125px; top:455px;" v-model="roads"/>
 			<div class="road r315" ></div>
 			<svg height="600" width="600" >
 				<!-- <polygon points="204,260 260,204 340,204 396,260 396,340 340,396 260,396 204,340"style="fill:#a8adb7;"/>-->
 				<polygon :points="points"
 				  style="fill:#a8adb7;"/>	
 			</svg>
+		</div>
+		<div class="topbtn">
+			<el-button type="primary" round plain @click="tonext">下一步</el-button>
 		</div>
 	</div>
 </template>
@@ -41,7 +45,10 @@
 				x6:'',
 				x7:'',
 				x8:'',
-				points:[]
+				points:[],
+				roads:[],
+				// 步骤条
+				active:0
 			}
 		},
 		mounted(){
@@ -57,7 +64,10 @@
 			this.points = [this.x1,this.x2,this.x3,this.x4,this.x5,this.x6,this.x7,this.x8].join(' ')
 		},
 		methods:{
-			
+			tonext(){
+				console.log(this.roads)
+				
+			}
 		}
 	}
 </script>
