@@ -63,6 +63,7 @@
 						"password": this.ruleForm.pass
 					}
 				}).then(res=>{
+					console.log(res)
 					sessionStorage.setItem("token",res.data.token)
 					sessionStorage.setItem('acount',res.data.userName)
 					// this.$root.token = res.token

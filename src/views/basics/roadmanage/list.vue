@@ -497,7 +497,10 @@
 			},
 			//路口设置跳转
 			roadSetting(){
-				this.$router.push({name:'rSetting'})
+				if(this.roadRowsId.length == 1){
+					console.log(this.roadRowsId)
+					this.$router.push({name:'rSetting', params:{ crossId: this.roadRowsId[0]}})
+				}
 			}
 			
 		}
