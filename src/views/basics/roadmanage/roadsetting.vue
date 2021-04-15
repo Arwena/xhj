@@ -8,7 +8,11 @@
 			<el-step title="周期方案"></el-step>
 			<el-step title="调度管理"></el-step>
 		</el-steps>
-		<div><router-view/></div>
+		<div>
+			<keep-alive>	
+				<router-view />
+			</keep-alive>
+		</div>
 		<div class="topbtn">
 			<el-button type="primary" round plain @click="tonext">下一步</el-button>
 		</div>
@@ -20,12 +24,12 @@
 		data(){
 			return{
 				active:0,
-				stepSeted:[],
+				stepSeted:[0],
 				crossId:''
 			}
 		},
 		mounted(){
-			this.crossId = this.$route.params.crossId
+			this.crossId = this.$route.query.crossId
 			this.$http({
 				url:'/cross/configMap',
 				param:{
@@ -33,19 +37,34 @@
 				}
 			}).then(res=>{
 				console.log(res)
+				
 			})
 		},
+		// watch:{
+		// 	'$route':function(n,o){
+		// 		console.log(n)
+		// 	}
+		// },
 		methods:{
 			tonext(){
 				this.active++
+				this.stepSeted.push(this.active)
+				console.log(this.stepSeted) 
+				switch(this.active){
+					case 0:
+					this.$router.push({name:'crosSeting',query:{ crossId: this.crossId}});
+					case 1:
+					this.$router.push({name:'laneSeting',query:{ crossId: this.crossId}});
+					
+				}
 			},
 			cross(){
-				this.$router.push({name:'crosSeting'})
+				this.$router.push({name:'crosSeting',query:{ crossId: this.crossId}});
 				this.active = 0
 			},
 			lane(){
 				// console.log('lane')
-				this.$router.push({name:'laneSeting'})
+				this.$router.push({name:'laneSeting',query:{ crossId: this.crossId}})
 				this.active = 1
 			}
 			

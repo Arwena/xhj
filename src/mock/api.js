@@ -11,7 +11,7 @@ export default  [
 		}
 	}),
 	Mock.mock(url.siderbar,{
-		'data|1':[
+		'data|1-1':[
 			{"menuId":11,"menuName":"信号监控","menuType":0,"icon":"el-icon-s-platform","path":"/monitor","available":true,"children":null},
 			{"menuId":12,"menuName":"信号机控制","menuType":0,"icon":"el-icon-s-operation","path":"/signalctrl","available":true,"children":null},
 			{"menuId":13,"menuName":"特勤控制","menuType":0,"icon":"el-icon-s-promotion","path":"/specialctrl","available":true,"children":null},

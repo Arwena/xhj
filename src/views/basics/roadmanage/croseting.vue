@@ -2,45 +2,46 @@
 	<div>
 		<!-- 路口设置第一步 -->
 		<div class="svg-contain" id="r-setting">
-			<input type="checkbox" name="r0" value="r0" style="left: 60px; top: 290px;" v-model="roads"/>
-			<div class="road r0">
-				<RoadTo v-show="roads.includes('r0')" ref="r0"></RoadTo>
-			</div>
-			<input type="checkbox" value="r180" style="left: 520px; top: 290px;" v-model="roads"/>
-			<div class="road r180">
-				<RoadTo v-show="roads.includes('r180')" ref="r180"></RoadTo>
-			</div>
 			<input type="checkbox" value="r90" style="top: 60px;left: 290px;" v-model="roads"/>
 			<div class="road r90">
 				<RoadTo v-show="roads.includes('r90')" ref="r90"></RoadTo>
-			</div>
-			<input type="checkbox" value="r270" style="top: 520px;left: 290px;" v-model="roads"/>
-			<div class="road r270" key='r270'>
-				<RoadTo v-show="roads.includes('r270')" ref="r270"></RoadTo>
-			</div>
-			<input type="checkbox" value="r45" style="left: 125px; top: 125px;" v-model="roads"/>
-			<div class="road r45" >
-				<RoadTo v-show="roads.includes('r45')" ref="r45"></RoadTo>
-			</div>
-			<input type="checkbox" value="r225" style="left: 455px; top:455px" v-model="roads"/>
-			<div class="road r225" >
-				<RoadTo v-show="roads.includes('r225')" ref="r225"></RoadTo>
 			</div>
 			<input type="checkbox" value="r135" style="left:455px; top: 125px;" v-model="roads"/>
 			<div class="road r135"  >
 				<RoadTo v-show="roads.includes('r135')" ref="r135"></RoadTo>
 			</div>
+			<input type="checkbox" value="r180" style="left:520px; top: 290px;" v-model="roads"/>
+			<div class="road r180">
+				<RoadTo v-show="roads.includes('r180')" ref="r180"></RoadTo>
+			</div>
+			<input type="checkbox" value="r225" style="left: 455px; top:455px" v-model="roads"/>
+			<div class="road r225" >
+				<RoadTo v-show="roads.includes('r225')" ref="r225"></RoadTo>
+			</div>
+			<input type="checkbox" value="r270" style="top: 520px;left: 290px;" v-model="roads"/>
+			<div class="road r270" key='r270'>
+				<RoadTo v-show="roads.includes('r270')" ref="r270"></RoadTo>
+			</div>
 			<input type="checkbox" value="r315"  style="left: 125px; top:455px;" v-model="roads"/>
 			<div class="road r315" >
 				<RoadTo v-show="roads.includes('r315')" ref="r315"></RoadTo>
 			</div>
+			<input type="checkbox" name="r0" value="r0" style="left: 60px; top: 290px;" v-model="roads"/>
+			<div class="road r0">
+				<RoadTo v-show="roads.includes('r0')" ref="r0"></RoadTo>
+			</div>
+			<input type="checkbox" value="r45" style="left: 125px; top: 125px;" v-model="roads"/>
+			<div class="road r45" >
+				<RoadTo v-show="roads.includes('r45')" ref="r45"></RoadTo>
+			</div>
+			
 			<svg height="600" width="600" >
 				<!-- <polygon points="204,260 260,204 340,204 396,260 396,340 340,396 260,396 204,340"style="fill:#a8adb7;"/>-->
 				<polygon :points="points"
-				  style="fill:#a8adb7;"/>	
+				  style="fill:#a8adb7;"/> 
 			</svg>
 		</div>
-		
+		<!-- <el-button type="primary" round plain @click="savecro">保存</el-button> -->
 	</div>
 </template>
 
@@ -64,10 +65,12 @@
 				points:[],
 				roads:[],
 				// 步骤条
-				active:0
+				active:0,
+				crossId:''
 			}
 		},
 		mounted(){
+			this.crossId = this.$route.query.crossId
 			this.x1 = [this.r-(Math.sin(45 * Math.PI / 180)*this.heiy + this.heiy/2) ,this.r+this.heiy/2]
 			this.x1 = this.x1.join(',')
 			this.x2 =  [this.r-(Math.sin(45 * Math.PI / 180)*this.heiy + this.heiy/2) ,this.r-this.heiy/2].join(',')
@@ -83,8 +86,78 @@
 			tonext(){
 				console.log(this.roads)
 				
+			},
+			savecro(){
+				let darr = []
+				for(let i=0;i<this.roads.length;i++){
+					darr[i] ={
+						crossId:this.crossId,
+						outLaneNumber:0,
+						roadNo:0,
+						roadAngle:this.roads[i]
+					}
+				}
+				// console.log(this,'1111')
+				let _this = this
+				darr.forEach(function(v){	
+					switch(v.roadAngle){
+						case 'r90':
+						v.roadNo = 0;
+						v.outLaneNumber = _this.$refs.r90.roadin
+						break;
+						case 'r135':
+						v.roadNo = 1;
+						v.outLaneNumber = _this.$refs.r135.roadin
+						break;
+						case 'r180':
+						v.roadNo = 2;
+						v.outLaneNumber = _this.$refs.r180.roadin
+						break;
+						case 'r225':
+						v.roadNo = 3;
+						v.outLaneNumber = _this.$refs.r225.roadin
+						break;
+						case 'r270':
+						v.roadNo = 4;
+						v.outLaneNumber = _this.$refs.r270.roadin
+						break;
+						case 'r315':
+						v.roadNo = 5;
+						v.outLaneNumber = _this.$refs.r315.roadin
+						break;
+						case 'r0':
+						v.roadNo = 6;
+						v.outLaneNumber = _this.$refs.r0.roadin
+						break;
+						case 'r45':
+						v.roadNo = 7;
+						v.outLaneNumber = _this.$refs.r45.roadin
+						break;
+					}
+				})
+				console.log(darr)
+				this.$http({
+					url:'/road/saveRoadList',
+					method:'POST',
+					data:darr
+				}).then(res=>{
+					// console.log(res)
+					this.$message({
+						message:res.message,
+						type:'success'
+					})
+					
+				})
 			}
-		}
+			
+		},
+		beforeRouteLeave(to, from, next) {
+		    // 导航离开该组件的对应路由时调用
+		    // 可以访问组件实例 `this`
+			// console.log(this)
+			this.savecro()
+			next()
+		  }
 	}
 </script>
 

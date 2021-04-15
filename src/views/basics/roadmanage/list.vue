@@ -499,7 +499,7 @@
 			roadSetting(){
 				if(this.roadRowsId.length == 1){
 					console.log(this.roadRowsId)
-					this.$router.push({name:'rSetting', params:{ crossId: this.roadRowsId[0]}})
+					this.$router.push({name:'rSetting', query:{ crossId: this.roadRowsId[0]}})
 				}
 			}
 			

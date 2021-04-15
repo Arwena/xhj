@@ -70,7 +70,7 @@ const htpreq = {
 					return
 				}else{
 					if(res.status == 200){
-						resolve(res)
+						resolve(res.data)
 					}
 				}
 			}).catch(err =>{
