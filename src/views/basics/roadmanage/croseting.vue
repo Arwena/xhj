@@ -66,7 +66,8 @@
 				roads:[],
 				// 步骤条
 				active:0,
-				crossId:''
+				crossId:'',
+				saveStatus:false
 			}
 		},
 		mounted(){
@@ -81,13 +82,25 @@
 			this.x7 =  [this.r+this.heiy/2 , this.r+(Math.sin(45 * Math.PI / 180)*this.heiy + this.heiy/2)].join(',')
 			this.x8 =  [this.r-this.heiy/2 , this.r+(Math.sin(45 * Math.PI / 180)*this.heiy + this.heiy/2)].join(',')
 			this.points = [this.x1,this.x2,this.x3,this.x4,this.x5,this.x6,this.x7,this.x8].join(' ')
+			// 获取当前路口设置数据
+			this.getcro()
 		},
 		methods:{
 			tonext(){
 				console.log(this.roads)
 				
 			},
-			savecro(){
+			getcro(){
+				this.$http({
+					url:'/road/query',
+					params:{
+						crossId:this.crossId
+					}
+				}).then(res=>{
+					this.roads = res.data.list.map((v)=>{return v.roadAngle})
+				})
+			},
+			savecro(func){
 				let darr = []
 				for(let i=0;i<this.roads.length;i++){
 					darr[i] ={
@@ -155,7 +168,7 @@
 		    // 导航离开该组件的对应路由时调用
 		    // 可以访问组件实例 `this`
 			// console.log(this)
-			this.savecro()
+			this.savecro( )
 			next()
 		  }
 	}

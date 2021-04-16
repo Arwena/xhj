@@ -121,7 +121,8 @@
 							// console.log('111111')
 							this.path += " L"+p[i+1].points[1].join(",") //直线
 						}else{
-							let cpoint = [(p[i].points[1][0]+p[i+1].points[0][0])/2,p[i].points[1][1]+p[i+1].points[0][1]/2]
+							let cpoint = [(p[i].points[1][0]+p[i+1].points[0][0])/2,(p[i].points[1][1]+p[i+1].points[0][1])/2]
+							console.log(cpoint)
 							this.path += " Q"+cpoint.join(',')+' '+p[i+1].points[0].join(",") //曲线 控制点、终点
 							this.path += " L"+p[i+1].points[1].join(",")
 						}
@@ -130,7 +131,7 @@
 							// 序号为7
 							this.path += " Z"
 						}else{
-							let cpo =  [(p[i].points[1][0]+p[0].points[0][0])/2,p[i].points[1][1]+p[0].points[0][1]/2]
+							let cpo =  [(p[i].points[1][0]+p[0].points[0][0])/2,(p[i].points[1][1]+p[0].points[0][1])/2]
 							this.path += " Q" + cpo.join(',') +" "+ p[0].points[0].join(',')+" Z"
 						}
 					}
