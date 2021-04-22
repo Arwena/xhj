@@ -1,99 +1,74 @@
 .rotate(@de){
-		transform: rotate(@de);
-		-ms-transform:rotate(@de);
-		-moz-transform:rotate(@de);
-		-webkit-transform:rotate(@de);
-		-o-transform:rotate(@de); 
-}
-.r(@deg){
-	.rotate(@deg);
-	select{
-		margin: 10px 0px 10px 0px;
-		.rotate(-@deg)
-	}
-}
-.svg-contain{
-	background-color: #eee;
-	width: 600px;
-	height: 600px;
-	margin:20px auto;
-	position: relative;
-}
-/* 设置路口 */
-.svg-contain input{
-	position: absolute;
-	top: 200;
-	left: 0;
-	z-index: 2;
-}
-.road {
-	width: 154px;
-	height: 80px;
-	background-color: #a8adb7;
-	position: absolute;
-}
-.r0{
-	top: 260px;
-	left: 50px;
-}
-.r45{
-	top: 138px;
-	left: 101px;
-	.r(45deg)
-}
-.r90{
-	top: 87px;
-	left:223px ;
-	.r(90deg)
-}
-.r135{
-	top: 138px;
-	left: 345px;
-	.r(135deg)
-}
-.r180{
-	top: 260px;
-	left: 396px;
-	.r(180deg)
-}
-.r225{
-	top: 382px;
-	left: 345px;
-	.r(225deg)
-}
-.r270{
-	top: 433px;
-	left: 223px;
-	.r(270deg)
-}
-.r315{
-	top: 382px;
-	left: 101px;
-	.r(315deg)
-}
-
-
-/* 车道设置 */
-.road-out {
-	margin-left:32px ;
-	height: 39px;
-	width: 120px;
-	border-bottom:2px solid #d0c060 ;
-}
-.road-out img {
-	display: inline-block;
-	margin-left: 30px;
-	margin-top: 15px;
-}
-.road-in {
-	margin-left:32px ;
-	height: 39px;
-	width: 120px;
-	border-right:2px solid #666 ;
-	
-}
-.road-in img {
-	display: inline-block;
-	margin-left: 30px;
-	margin-top: 15px;
-}
+	 		transform: rotate(@de);
+	 		-ms-transform:rotate(@de);
+	 		-moz-transform:rotate(@de);
+	 		-webkit-transform:rotate(@de);
+	 		-o-transform:rotate(@de); 
+	 }
+	 .r(@deg){
+	 	.rotate(@deg);
+	 	select{
+	 		margin: 10px 0px 10px 0px;
+	 		.rotate(-@deg)
+	 	}
+	 }
+	 .svg-contain{
+	 	// background-color: #eee;
+	 	width: @contx*2;
+	 	height: @conty*2;
+	 	margin:30px auto;
+	 	position: relative;
+	 }
+	 /* 设置路口 */
+	 .svg-contain input{
+	 	position: absolute;
+	 	// top: 200;
+	 	// left: 0;
+	 	z-index: 2;
+	 }
+	 .road {
+	 	width: @widx;
+	 	height: @heiy;
+	 	background-color: #a8adb7;
+	 	position: absolute;
+	 }
+	 .r0{
+	 	top: @conty - @heiy/2;
+	 	left:ceil(@contx - @heiy/2 - @heiy*sin(45deg) - @widx) 
+		// left: 50px;
+	 }
+	 .r45{
+	 	top:ceil( @conty - @heiy/2 - (@heiy*sin(45deg))/2 - (@heiy/2 + @widx/2*sin(45deg)));
+	 	left:ceil(@contx - @heiy/2- (@heiy*sin(45deg))/2 - (@widx/2 + @widx/2*cos(45deg)));
+	 	.r(45deg);
+	 }
+	 .r90{
+	 	top: ceil(@conty - @heiy/2 - @heiy*sin(45deg) - (@heiy/2+@widx/2));
+	 	left:ceil(@contx - @widx/2);
+	 	.r(90deg)
+	 }
+	 .r135{
+	 	top:ceil( @conty - @heiy/2 - (@heiy*sin(45deg))/2 - (@heiy/2 + @widx/2*sin(45deg)));
+	 	left: floor(@contx + @heiy/2+ (@heiy*sin(45deg))/2 - (@widx/2 - @widx/2*cos(45deg)));
+	 	.r(135deg)
+	 }
+	 .r180{
+	 	top:  @conty - @heiy/2;
+	 	left: floor(@contx + @heiy/2 + @heiy*sin(45deg));
+	 	.r(180deg)
+	 }
+	 .r225{
+	 	top:floor( @conty + @heiy/2 + (@heiy*sin(45deg))/2 - (@heiy/2 - @widx/2*sin(45deg)));
+	 	left: floor(@contx + @heiy/2+ (@heiy*sin(45deg))/2 - (@widx/2 - @widx/2*cos(45deg)));
+	 	.r(225deg)
+	 }
+	 .r270{
+	 	top: floor(@conty + @heiy/2 + @heiy*sin(45deg) - (@heiy/2-@widx/2));
+	 	left: ceil(@contx - @widx/2);
+	 	.r(270deg)
+	 }
+	 .r315{
+	 	top: floor( @conty + @heiy/2 + (@heiy*sin(45deg))/2 - (@heiy/2 - @widx/2*sin(45deg)));
+	 	left: ceil(@contx - @heiy/2- (@heiy*sin(45deg))/2 - (@widx/2 + @widx/2*cos(45deg)));
+	 	.r(315deg)
+	 }

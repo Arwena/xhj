@@ -4,35 +4,35 @@
 		<div class="svg-contain" id="r-setting">
 			<input type="checkbox" value="r90" style="top: 60px;left: 290px;" v-model="roads"/>
 			<div class="road r90">
-				<RoadTo v-show="roads.includes('r90')" ref="r90"></RoadTo>
+				<RoadTo v-show="roads.includes('r90')" ref="r90" :rin="inandout.r90.in" :rout="inandout.r90.out"></RoadTo>
 			</div>
 			<input type="checkbox" value="r135" style="left:455px; top: 125px;" v-model="roads"/>
 			<div class="road r135"  >
-				<RoadTo v-show="roads.includes('r135')" ref="r135"></RoadTo>
+				<RoadTo v-show="roads.includes('r135')" ref="r135" :rin="inandout.r135.in" :rout="inandout.r135.out"></RoadTo>
 			</div>
 			<input type="checkbox" value="r180" style="left:520px; top: 290px;" v-model="roads"/>
 			<div class="road r180">
-				<RoadTo v-show="roads.includes('r180')" ref="r180"></RoadTo>
+				<RoadTo v-show="roads.includes('r180')" ref="r180" :rin="inandout.r180.in" :rout="inandout.r180.out"></RoadTo>
 			</div>
 			<input type="checkbox" value="r225" style="left: 455px; top:455px" v-model="roads"/>
 			<div class="road r225" >
-				<RoadTo v-show="roads.includes('r225')" ref="r225"></RoadTo>
+				<RoadTo v-show="roads.includes('r225')" ref="r225" :rin="inandout.r225.in" :rout="inandout.r225.out"></RoadTo>
 			</div>
 			<input type="checkbox" value="r270" style="top: 520px;left: 290px;" v-model="roads"/>
 			<div class="road r270" key='r270'>
-				<RoadTo v-show="roads.includes('r270')" ref="r270"></RoadTo>
+				<RoadTo v-show="roads.includes('r270')" ref="r270" :rin="inandout.r270.in" :rout="inandout.r270.out"></RoadTo>
 			</div>
 			<input type="checkbox" value="r315"  style="left: 125px; top:455px;" v-model="roads"/>
 			<div class="road r315" >
-				<RoadTo v-show="roads.includes('r315')" ref="r315"></RoadTo>
+				<RoadTo v-show="roads.includes('r315')" ref="r315" :rin="inandout.r315.in" :rout="inandout.r315.out"></RoadTo>
 			</div>
 			<input type="checkbox" name="r0" value="r0" style="left: 60px; top: 290px;" v-model="roads"/>
 			<div class="road r0">
-				<RoadTo v-show="roads.includes('r0')" ref="r0"></RoadTo>
+				<RoadTo v-show="roads.includes('r0')" ref="r0" :rin="inandout.r0.in" :rout="inandout.r0.out"></RoadTo>
 			</div>
 			<input type="checkbox" value="r45" style="left: 125px; top: 125px;" v-model="roads"/>
 			<div class="road r45" >
-				<RoadTo v-show="roads.includes('r45')" ref="r45"></RoadTo>
+				<RoadTo v-show="roads.includes('r45')" ref="r45" :rin="inandout.r45.in" :rout="inandout.r45.out"></RoadTo>
 			</div>
 			
 			<svg height="600" width="600" >
@@ -64,11 +64,52 @@
 				x8:'',
 				points:[],
 				roads:[],
+				inandout:{
+					r0:{
+						in:0,
+						out:0
+					},
+					r45:{
+						in:0,
+						out:0
+					},
+					r90:{
+						in:0,
+						out:0
+					},
+					r135:{
+						in:0,
+						out:0
+					},
+					r180:{
+						in:0,
+						out:0
+					},
+					r225:{
+						in:0,
+						out:0
+					},
+					r270:{
+						in:0,
+						out:0
+					},
+					r315:{
+						in:0,
+						out:0
+					}
+					
+				},
 				// 步骤条
 				active:0,
 				crossId:'',
-				saveStatus:false
+				saveStatus:false,
+				getdata:[],
+				sendData:[],
+				datachange:false
 			}
+		},
+		created(){
+			// this.getcro()
 		},
 		mounted(){
 			this.crossId = this.$route.query.crossId
@@ -86,10 +127,6 @@
 			this.getcro()
 		},
 		methods:{
-			tonext(){
-				console.log(this.roads)
-				
-			},
 			getcro(){
 				this.$http({
 					url:'/road/query',
@@ -97,15 +134,46 @@
 						crossId:this.crossId
 					}
 				}).then(res=>{
-					this.roads = res.data.list.map((v)=>{return v.roadAngle})
+					if(res.data.length!=0){
+						this.getdata = res.data
+						this.roads = res.data.map((v)=>{return v.roadAngle})
+						// 道路数据集合
+						res.data.forEach(item =>{
+							this.inandout[item.roadAngle].in = item.inLaneNumber 
+							this.inandout[item.roadAngle].out = item.outLaneNumber
+						})
+						// console.log(this.inandout)
+					}else{
+						
+					}
 				})
 			},
-			savecro(func){
+			async savecro(func){
+				// this.comdata()
+				// console.log(darr)
+				let _this = this
+				let re = await this.$http({
+					url:'/road/saveRoadList',
+					method:'POST',
+					data:this.sendData
+				}).then(res=>{
+					// 判断状态成功
+					_this.$message({
+						message:res.message,
+						type:'success'
+					})
+					// 返回状态
+					_this.saveStatus = true
+				})
+				return _this.saveStatus
+			},
+			comdata(){
 				let darr = []
 				for(let i=0;i<this.roads.length;i++){
 					darr[i] ={
 						crossId:this.crossId,
 						outLaneNumber:0,
+						inLaneNumber:0,
 						roadNo:0,
 						roadAngle:this.roads[i]
 					}
@@ -116,61 +184,163 @@
 					switch(v.roadAngle){
 						case 'r90':
 						v.roadNo = 0;
-						v.outLaneNumber = _this.$refs.r90.roadin
+						v.outLaneNumber = _this.$refs.r90.roadout
+						v.inLaneNumber = _this.$refs.r90.roadin
 						break;
 						case 'r135':
 						v.roadNo = 1;
-						v.outLaneNumber = _this.$refs.r135.roadin
+						v.outLaneNumber = _this.$refs.r135.roadout
+						v.inLaneNumber = _this.$refs.r135.roadin
 						break;
 						case 'r180':
 						v.roadNo = 2;
-						v.outLaneNumber = _this.$refs.r180.roadin
+						v.outLaneNumber = _this.$refs.r180.roadout
+						v.inLaneNumber = _this.$refs.r180.roadin
 						break;
 						case 'r225':
 						v.roadNo = 3;
-						v.outLaneNumber = _this.$refs.r225.roadin
+						v.outLaneNumber = _this.$refs.r225.roadout
+						v.inLaneNumber = _this.$refs.r225.roadin
 						break;
 						case 'r270':
 						v.roadNo = 4;
-						v.outLaneNumber = _this.$refs.r270.roadin
+						v.outLaneNumber = _this.$refs.r270.roadout
+						v.inLaneNumber = _this.$refs.r270.roadin
 						break;
 						case 'r315':
 						v.roadNo = 5;
-						v.outLaneNumber = _this.$refs.r315.roadin
+						v.outLaneNumber = _this.$refs.r315.roadout
+						v.inLaneNumber = _this.$refs.r315.roadin
 						break;
 						case 'r0':
 						v.roadNo = 6;
-						v.outLaneNumber = _this.$refs.r0.roadin
+						v.outLaneNumber = _this.$refs.r0.roadout
+						v.inLaneNumber = _this.$refs.r0.roadin
 						break;
 						case 'r45':
 						v.roadNo = 7;
-						v.outLaneNumber = _this.$refs.r45.roadin
+						v.outLaneNumber = _this.$refs.r45.roadout
+						v.inLaneNumber = _this.$refs.r45.roadin
 						break;
 					}
 				})
-				console.log(darr)
-				this.$http({
-					url:'/road/saveRoadList',
-					method:'POST',
-					data:darr
-				}).then(res=>{
-					// console.log(res)
-					this.$message({
-						message:res.message,
-						type:'success'
-					})
-					
+				this.sendData = darr
+				// 
+				let roads = darr.map((v)=>{return v.roadAngle})
+				// 道路数据集合
+				let inandout0 ={}
+				Object.assign(inandout0,_this.$options.data().inandout)
+				darr.forEach(item =>{
+					inandout0[item.roadAngle].in = item.inLaneNumber 
+					inandout0[item.roadAngle].out = item.outLaneNumber
 				})
+				// 比较验证
+				if(this.compara(roads,this.roads,'array') && this.compara(inandout0,this.inandout,'obj')){
+					return true
+				}else{
+					return false
+				}
+			},
+			// 
+			compara(a,b,type){
+				if(type =='array'){
+					if (a.length != b.length){
+						return false
+					}
+					for (var i = 0, l = a.length; i < l; i++) {
+					      if (a[i] != b[i]) { 
+					           return false;   
+					       }           
+				    }       
+					    return true;
+				}else{
+					for(let angle in a ){
+						for(let inout in a[angle]){
+							if(a[angle][inout] != b[angle][inout]) {
+							     return false;
+							}
+						}
+					}
+					return true
+				}
+			},
+			
+			async tonext(){
+				let _this = this
+				let flag = false
+				if(this.roads.length == 0){
+					this.$message({
+						message:'当前数据为空,请设置',
+						type:'warning'
+					})
+					return false
+				}else{
+					if(!this.comdata()){
+						 await _this.$msgbox({
+							message:'确定保存更改',
+							title:'消息',
+							showCancelButton:true,
+							cancelButtonText:'不保存'
+						}).then(async()=>{
+							let s =await _this.savecro()
+							if(s){
+								flag = true
+							}
+						}).catch(()=>{
+							flag = true
+						})
+						return flag
+					}else{
+						return true
+					}
+				}
+				
 			}
+		},
+		watch:{
 			
 		},
-		beforeRouteLeave(to, from, next) {
-		    // 导航离开该组件的对应路由时调用
-		    // 可以访问组件实例 `this`
-			// console.log(this)
-			this.savecro( )
-			next()
-		  }
+		// async beforeRouteLeave(to, from, next) {
+		//     // 导航离开该组件的对应路由时调用
+		//     // 可以访问组件实例 `this`
+		// 	// 要求离开页面时判断是否保存新增修改、或者提示当前未存在数据 并增加弹框确认操作，
+		// 	let _this = this
+		// 	if(!this.$parent.isnext){
+		// 		next()
+		// 	}else{
+		// 		if(this.roads.length == 0){
+		// 			this.$message({
+		// 				message:'当前数据为空,请设置',
+		// 				type:'warning'
+		// 			})
+		// 			next(false)
+		// 			this.$parent.active--
+		// 		}else{
+		// 			if(!this.comdata()){
+		// 				this.$msgbox({
+		// 					message:'确定保存更改',
+		// 					title:'消息',
+		// 					showCancelButton:true,
+		// 					cancelButtonText:'不保存'
+		// 				}).then(async ()=>{
+		// 					let s =await _this.savecro()
+		// 					if(s){
+		// 						this.$parent.stepSeted.push(this.$parent.active)
+		// 						next()
+		// 					}
+		// 				}).catch(()=>{
+		// 					this.$parent.stepSeted.push(this.$parent.active)
+		// 					next()
+		// 				})
+						
+		// 			}else{
+		// 				this.$parent.stepSeted.push(this.$parent.active)
+		// 				next()
+		// 			}
+		// 		}
+				
+		// 	}
+		//   }
 	}
 </script>
 

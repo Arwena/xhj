@@ -18,17 +18,23 @@
 <script>
 	export default{
 		name:'roadto',
-		props:{
-			
-		},
+		props:['rin','rout'],
 		data(){
 			return{
-				roadin:0,
-				roadout:0
+				roadin:this.rin,
+				roadout:this.rout
 			}
 		},
 		methods:{
 			
+		},
+		watch:{
+			rin:function(newv,oldv){
+				this.roadin = newv
+			},
+			rout:function(newv,oldv){
+				this.roadout = newv
+			}
 		}
 	}
 </script>

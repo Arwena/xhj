@@ -23,7 +23,7 @@
 					</el-popover>
 				</template>
 			</el-table-column>
-			<el-table-column align="center" v-if="currentUrl == '/log/error/query'" label="错误描述" prop="errorDetails" width="200">
+			<el-table-column align="center" v-if="errorIs" label="错误描述" prop="errorDetails" width="200">
 				<template slot-scope="scope">
 					<el-popover width="600" trigger="click">
 						<el-scrollbar style="width: 100%; height: 100%;">

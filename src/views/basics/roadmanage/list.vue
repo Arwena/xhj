@@ -26,8 +26,8 @@
 				<el-table-column label="备注" prop="remark" width="250"></el-table-column>
 				<el-table-column label="操作"  width="">
 					<template slot-scope="handle">
-						<el-link type="primary" @click="roadSetting">路口设置</el-link>
-						<el-link type="primary" @click="videoSetting">视频设置</el-link>
+						<el-link type="primary" @click="roadSetting(handle.row.crossId)">路口设置</el-link>
+						<el-link type="primary" @click="videoSetting(handle.row)">视频设置</el-link>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -195,6 +195,7 @@
 				isaddInfo:false,       //判断是否是新增信息对话框
 				camRows:[],           
 				camRowsId:[],
+				currCrosId:'',
 				camform:{              //相机对话框
 					crossId:'',
 					cameraNo:'',
@@ -375,34 +376,29 @@
 				this.$http({
 					url:'/videoCamera/query',
 					params:{
-						crossId:this.roadRowsId[0]
+						crossId:this.currCrosId
 					}
 				}).then(res =>{
 					this.cameralist = res.data
 				})
 			},
 			//视频设置
-			videoSetting(){
-				if(this.roadRowsId.length == 1){
-					this.curRoad = this.roadRows[0].crossAlias
-					this.videodia = true
-					//请求相机列表
-					this.getcamList()
-					//请求路口道路列表
-					this.$http({
-						url:'/road/getRoadMap',
-						params:{
-							crossId:this.roadRowsId[0]
-						}
-					}).then(res=>{
-						this.roadList = res.data
-					})
-				}else{
-					this.$message({
-						message:'请选择当前路口',
-						type:'warning'
-					})
-				}
+			videoSetting(row){
+				this.curRoad = row.crossAlias
+				this.videodia = true
+				this.currCrosId = row.crossId
+				//请求相机列表
+				this.getcamList()
+				//请求路口道路列表
+				this.$http({
+					url:'/road/getRoadMap',
+					params:{
+						crossId:row.crossId
+					}
+				}).then(res=>{
+					this.roadList = res.data
+				})
+				
 				
 			},
 			// 视频相机表格选中切换
@@ -413,7 +409,7 @@
 			// 新增相机
 			addCam(){
 				Object.assign(this.$data.camform,this.$options.data().camform)
-				this.camform.crossId = this.roadRowsId[0]
+				this.camform.crossId = this.currCrosId
 				if(this.roadList.length == 0){
 					this.$message({
 						message:'暂无道路，请先设置道路',
@@ -496,11 +492,9 @@
 				})
 			},
 			//路口设置跳转
-			roadSetting(){
-				if(this.roadRowsId.length == 1){
-					console.log(this.roadRowsId)
-					this.$router.push({name:'rSetting', query:{ crossId: this.roadRowsId[0]}})
-				}
+			roadSetting(croid){
+				this.$router.push({name:'rSetting', query:{ crossId: croid}})
+				
 			}
 			
 		}

@@ -1,7 +1,22 @@
 <template>
-	<div >
+	<div class="laneseting">
 		<!-- 表格 -->
-		<div></div>
+		<div class="tablecont">
+			<!-- 车道数据 -->
+			<el-table :data="lanetable" border="">
+				<el-table-column label="车道序号" prop="laneNo" align="center"></el-table-column>
+				<el-table-column label="入口方向" prop="roadNo" :formatter="towardinit" align="center"></el-table-column>
+				<el-table-column label="车道类型" prop="movement"  align="center"></el-table-column>
+				<el-table-column label="待行区" prop="" align="center"></el-table-column>
+			</el-table>
+			<!-- 道路数据 -->
+			<el-table :data="roadtable" border>
+				<el-table-column label="方向序号" prop="roadNo" align="center"></el-table-column>
+				<el-table-column label="方向" align="center" prop="roadNo" :formatter="towardinit"></el-table-column>
+				<el-table-column label="道路名" align="center" prop="roadName"></el-table-column>
+				<el-table-column label="标志建筑" align="center" prop="landmarks"></el-table-column>
+			</el-table>
+		</div>
 		<!-- 道路设置 -->
 		<div class="svg-contain" id="r-setting">
 			<div v-for="item in roadList" class="road" :class="item"></div>
@@ -20,6 +35,7 @@
 				roadList:[],
 				roadNo:[],
 				crossId:'',
+				crossName:'',
 				rw:100,
 				rh:160,
 				cx:300,
@@ -33,7 +49,9 @@
 				r225:[],
 				r270:[],
 				r315:[],
-				path:''
+				path:'',
+				lanetable:[],
+				roadtable:[]
 			}
 		},
 		activated(){
@@ -43,14 +61,21 @@
 		methods:{
 			getroad(){
 				this.$http({
-					url:'/road/query',
+					url:'/road/queryRoadAndLane',
 					params:{
 						crossId:this.crossId
 					}
 				}).then(res=>{
-					this.roadList = res.data.list.map((v)=>{return v.roadAngle})
-					this.roadNo = res.data.list.map((v)=>{return v.roadNo})
-					console.log(this.roadList)
+					this.roadList = res.data.roadInfoList.map((v)=>{return v.roadAngle})
+					this.roadNo = res.data.roadInfoList.map((v)=>{return v.roadNo})
+					this.lanetable = res.data.laneInfoList
+					this.roadtable = res.data.roadInfoList
+					this.crossName = res.data.roadInfoList[0].crossName
+					if(this.lanetable.length==0){
+						// 初始化通道列表
+						this.initlane()
+					}
+					// console.log(this.roadList)
 					// 计算衔接点坐标信息
 					this.compuPoints()
 				})
@@ -156,7 +181,57 @@
 				this.r270 = [x7,x8]
 				this.r315 = [x8,x1]
 				
+			},
+			tonext(){
+				return false
+			},
+			initlane(){
+				let len = this.roadtable.length
+				let No = 1
+				for(let i=0;i<len;i++){
+					let inlen =  this.roadtable[i].inLaneNumber
+					for(let j=1;j<=inlen;j++){
+						this.lanetable.push({
+							crossId:this.crossId,
+							crossName:this.crossName,
+							isWaitable:false,
+							laneNo:No++,
+							movement:'',
+							roadName:this.roadtable[i].roadName,
+							roadNo:this.roadtable[i].roadNo
+						})
+					}
+				}
+			},
+			towardinit(r,c){
+				switch(r.roadNo){
+					case 0:
+					return '北';
+					break;
+					case 1:
+					return '东北';
+					break;
+					case 2:
+					return '东';
+					break;
+					case 3:
+					return '东南';
+					break;
+					case 4:
+					return '南';
+					break;
+					case 5:
+					return '西南';
+					break;
+					case 6:
+					return '西';
+					break;
+					case 7:
+					return '西北';
+					break;
+				}
 			}
+			
 		}
 	}
 </script>
@@ -242,4 +317,12 @@
 	 	left: ceil(@contx - @heiy/2- (@heiy*sin(45deg))/2 - (@widx/2 + @widx/2*cos(45deg)));
 	 	.r(315deg)
 	 }
+	 .laneseting{
+		 display: flex;
+		 .tablecont{
+		 	width: 50%;	 
+		 }
+	 }
+	 
 </style>
+	<!-- @import "../../../assets/theme/svgxhj.less" -->
