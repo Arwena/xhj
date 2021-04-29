@@ -19,7 +19,27 @@
 		</div>
 		<!-- 道路设置 -->
 		<div class="svg-contain" id="r-setting">
-			<div v-for="item in roadList" class="road" :class="item"></div>
+			<div v-for="item in roadList" class="road" :class="item.angle">
+				<svg :width="rw-25" :height="rh">
+					<g fill="rgb(168, 173, 183)" >
+						<rect v-for="i in item.out" :width="rw" :height="((rh*0.3)/item.out)" x="0" :y="(rh*0.3/item.out)*(i-1)"></rect>
+					</g>
+					<rect :width="rw" :height="1" fill="#eeee00" x="0"  :y="rh*0.3"></rect>
+					<g fill="#3b434d">
+						<rect v-for="i in item.in" :width="rw" :height="((rh*0.7)/item.in)" x="0" :y="rh*0.3+(rh*0.7/item.in)*(i-1)+i" ></rect>
+					</g>
+					
+				</svg>
+				<svg :width="25" :height="rh" >
+					<!-- <rect :width="25" :height="rh" x="0"  :y="0" fill="#4d4e50"></rect> -->
+					<defs>
+						<pattern id="pattern-image"  x="0" y="0" width="1" height="8" patternUnits="userSpaceOnUse">
+							<image xlink:href="@/assets/image/pattern_03.png"/>
+						</pattern>
+					</defs>
+					<rect fill="url(#pattern-image)" :width="25" :height="rh" ></rect>
+				</svg>
+			</div>
 			<svg height="600" width="600" >
 				<!-- 具体点位由 函数根据参数生成 -->
 				<path :d="path" stroke="none"  style="fill:#a8adb7;"></path>
@@ -54,6 +74,12 @@
 				roadtable:[]
 			}
 		},
+		computed:{
+			rectheight:function(){
+				
+			}
+		},
+		// ???
 		activated(){
 			this.crossId = this.$route.query.crossId
 			this.getroad()
@@ -61,12 +87,12 @@
 		methods:{
 			getroad(){
 				this.$http({
-					url:'/road/queryRoadAndLane',
+					url:'/cross/queryRoadAndLane',
 					params:{
 						crossId:this.crossId
 					}
 				}).then(res=>{
-					this.roadList = res.data.roadInfoList.map((v)=>{return v.roadAngle})
+					this.roadList = res.data.roadInfoList.map((v)=>{return {angle: v.roadAngle,in:v.inLaneNumber,out:v.outLaneNumber}})
 					this.roadNo = res.data.roadInfoList.map((v)=>{return v.roadNo})
 					this.lanetable = res.data.laneInfoList
 					this.roadtable = res.data.roadInfoList
@@ -143,12 +169,11 @@
 				for(let i = 0; i<p.length ;i++){
 					if(i != p.length-1){
 						if((p[i].no + 1 )== p[i+1].no){
-							// console.log('111111')
 							this.path += " L"+p[i+1].points[1].join(",") //直线
 						}else{
 							let cpoint = [(p[i].points[1][0]+p[i+1].points[0][0])/2,(p[i].points[1][1]+p[i+1].points[0][1])/2]
 							console.log(cpoint)
-							this.path += " Q"+cpoint.join(',')+' '+p[i+1].points[0].join(",") //曲线 控制点、终点
+							this.path += " Q"+cpoint.join(',')+' '+p[i+1].points[0].join(",") //曲线 控制点、终点(如果要做弧度曲线则更改此处控制点的坐标)
 							this.path += " L"+p[i+1].points[1].join(",")
 						}
 					}else{
@@ -163,6 +188,7 @@
 					
 				}
 			},
+			// 所有道路内侧衔接点 信息
 			allpoint(){
 				let x1 = [this.cx-this.rh/2-Math.sin(45 * Math.PI / 180)*this.rh,this.cy+this.rh/2]
 				let x2 = [this.cx-this.rh/2-Math.sin(45 * Math.PI / 180)*this.rh,this.cy-this.rh/2]
@@ -182,9 +208,11 @@
 				this.r315 = [x8,x1]
 				
 			},
+			// 父组件点击下一步 响应事件
 			tonext(){
 				return false
 			},
+			// 初始化车道数据
 			initlane(){
 				let len = this.roadtable.length
 				let No = 1
@@ -203,6 +231,7 @@
 					}
 				}
 			},
+			// 表格数据格式
 			towardinit(r,c){
 				switch(r.roadNo){
 					case 0:
@@ -237,6 +266,7 @@
 </script>
 
 <style lang="less" scoped>
+	// s设置道路宽高样式变量
 	@widx:100px;
 	@heiy:160px;
 	
