@@ -2,8 +2,8 @@
 	<div class="sidebar">
 		<el-aside >
 			<el-scrollbar style="height: 100%; width: 100%;">
-				<el-menu background-color="#001c47" text-color="#8a979e"  default-active="home"  @open="handleOpen" @close="handleClose">
-					<el-menu-item index="home" @click="$router.push({ name: 'First' })">
+				<el-menu background-color="#001c47" text-color="#8a979e"  :default-active="$route.path" router @open="handleOpen" @close="handleClose">
+					<el-menu-item index="/first" @click="$router.push({ name: 'First' })">
 						<i class="el-icon-s-home"></i>
 						<span slot="title">首页</span>
 					 </el-menu-item>
@@ -35,6 +35,9 @@
 			return{
 				navlist:[]
 			}
+		},
+		created(){
+			
 		},
 		mounted(){
 			this.getNavlist()

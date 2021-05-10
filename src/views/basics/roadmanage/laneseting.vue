@@ -19,14 +19,21 @@
 		</div>
 		<!-- 道路设置 -->
 		<div class="svg-contain" id="r-setting">
-			<div v-for="item in roadList" class="road" :class="item.angle">
+			<div v-for="(item,index) in roadList" class="road" :class="item.angle">
 				<svg :width="rw-25" :height="rh">
 					<g fill="rgb(168, 173, 183)" >
-						<rect v-for="i in item.out" :width="rw" :height="((rh*0.3)/item.out)" x="0" :y="(rh*0.3/item.out)*(i-1)"></rect>
+						<!-- 出口方向车道绘制 -->
+						<rect v-for="i in item.out" :width="rw" :height="((rh*0.3)/item.out)" x="0" :y="(rh*0.3/item.out)*(i-1)" ></rect>
 					</g>
 					<rect :width="rw" :height="1" fill="#eeee00" x="0"  :y="rh*0.3"></rect>
 					<g fill="#3b434d">
-						<rect v-for="i in item.in" :width="rw" :height="((rh*0.7)/item.in)" x="0" :y="rh*0.3+(rh*0.7/item.in)*(i-1)+i" ></rect>
+						<!-- 入口方向车道绘制 -->
+						<svg  v-for="i in item.in" :width="rw" :height="((rh*0.7)/item.in)" x="0" :y="rh*0.3+(rh*0.7/item.in)*(i-1)+i">
+							<rect :width="rw" :height="((rh*0.7)/item.in)"  @click="openDia(index*item.in+i)" >
+							</rect>
+							<text x="60" y="20" font-size="12" fill="#eee">{{i}}</text>
+							<image x="25" y="-2" href="@/assets/image/left2.png"></image>
+						</svg>
 					</g>
 					
 				</svg>
@@ -34,7 +41,7 @@
 					<!-- <rect :width="25" :height="rh" x="0"  :y="0" fill="#4d4e50"></rect> -->
 					<defs>
 						<pattern id="pattern-image"  x="0" y="0" width="1" height="8" patternUnits="userSpaceOnUse">
-							<image xlink:href="@/assets/image/pattern_03.png"/>
+							<image href="@/assets/image/pattern_03.png"/>
 						</pattern>
 					</defs>
 					<rect fill="url(#pattern-image)" :width="25" :height="rh" ></rect>
@@ -45,6 +52,10 @@
 				<path :d="path" stroke="none"  style="fill:#a8adb7;"></path>
 			</svg>
 		</div>
+		<!-- 车道方向弹框 -->
+		<el-dialog title="选择车道转向" :visible.sync="dialog">
+			
+		</el-dialog>
 	</div>
 </template>
 
@@ -71,7 +82,8 @@
 				r315:[],
 				path:'',
 				lanetable:[],
-				roadtable:[]
+				roadtable:[],
+				dialog:false
 			}
 		},
 		computed:{
@@ -230,6 +242,7 @@
 						})
 					}
 				}
+				console.log(this.lanetable)
 			},
 			// 表格数据格式
 			towardinit(r,c){
@@ -259,6 +272,10 @@
 					return '西北';
 					break;
 				}
+			},
+			// SVG点击
+			openDia(i){
+				this.dialog = true
 			}
 			
 		}
