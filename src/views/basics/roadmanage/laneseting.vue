@@ -26,19 +26,19 @@
 						<rect v-for="i in item.out" :width="rw" :height="((rh*0.3)/item.out)" x="0" :y="(rh*0.3/item.out)*(i-1)" ></rect>
 					</g>
 					<rect :width="rw" :height="1" fill="#eeee00" x="0"  :y="rh*0.3"></rect>
-					<g fill="#3b434d">
+					<g fill="#3b434d" class="lanein">
 						<!-- 入口方向车道绘制 -->
-						<svg  v-for="i in item.in" :width="rw" :height="((rh*0.7)/item.in)" x="0" :y="rh*0.3+(rh*0.7/item.in)*(i-1)+i">
+						<svg  v-for="i in item.in" :width="rw" :height="((rh*0.7)/item.in)" x="0" :y="rh*0.3+(rh*0.7/item.in)*(i-1)+i"  >
 							<rect :width="rw" :height="((rh*0.7)/item.in)"  @click="openDia(index*item.in+i)" >
 							</rect>
-							<text x="60" y="20" font-size="12" fill="#eee">{{i}}</text>
+							<text x="60" y="20" font-size="12" fill="#eee" >{{i}}</text>
 							<image x="25" y="-2" href="@/assets/image/left2.png"></image>
 						</svg>
 					</g>
 					
 				</svg>
+				<!-- 人行横道 -->
 				<svg :width="25" :height="rh" >
-					<!-- <rect :width="25" :height="rh" x="0"  :y="0" fill="#4d4e50"></rect> -->
 					<defs>
 						<pattern id="pattern-image"  x="0" y="0" width="1" height="8" patternUnits="userSpaceOnUse">
 							<image href="@/assets/image/pattern_03.png"/>
@@ -47,14 +47,33 @@
 					<rect fill="url(#pattern-image)" :width="25" :height="rh" ></rect>
 				</svg>
 			</div>
+			<!-- 道路衔接部分 -->
 			<svg height="600" width="600" >
 				<!-- 具体点位由 函数根据参数生成 -->
 				<path :d="path" stroke="none"  style="fill:#a8adb7;"></path>
 			</svg>
 		</div>
 		<!-- 车道方向弹框 -->
-		<el-dialog title="选择车道转向" :visible.sync="dialog">
-			
+		<el-dialog title="选择车道转向" :visible.sync="dialog" >
+			<el-tabs type="card">
+				<el-tab-pane label="选择车道转向">
+					<!-- 循环列出当前方向 -->
+					<div>
+						<div v-for="(item,index) in towardlist" class="inblock">
+							<el-image style="width: 60px;height: 60px;"  :src="item.url" fit="scale-down" @click="SelectTo(index)"></el-image>
+							<span class="imglab">{{item.label}}</span>
+						</div>
+						<!-- <div > -->
+							<!-- <el-card shadow="hover" style="width: 60px;height: 60px;">
+								<img src="@/assets/image/goStraight2.png" fit="fill"/>
+							</el-card> -->
+							<!-- <el-image style="width: 60px;height: 60px;"  :src="url" fit="scale-down"></el-image> 
+							<span class="imglab">直行</span>
+						</div> -->
+					</div>
+				</el-tab-pane>
+				<el-tab-pane label="自定义车道转向"></el-tab-pane>
+			</el-tabs>
 		</el-dialog>
 	</div>
 </template>
@@ -83,20 +102,26 @@
 				path:'',
 				lanetable:[],
 				roadtable:[],
-				dialog:false
-			}
-		},
-		computed:{
-			rectheight:function(){
+				dialog:false,
+				currentLane:'',
+				towardlist:[  // 弹窗、车道、表格，关联数据集合
+					{label:'直行',url:require('@/assets/image/goStraight2.png')},
+					{label:'左转',url:require('@/assets/image/left2.png')},
+					{label:'右转',url:require('@/assets/image/right2.png')},
+					{label:'掉头',url:require('@/assets/image/round2.png')}
+				]
 				
 			}
 		},
-		// ???
+		computed:{
+		},
+		// 激活状态下获取信息
 		activated(){
 			this.crossId = this.$route.query.crossId
 			this.getroad()
 		},
 		methods:{
+			// 获取当前车道设置页信息用于回显
 			getroad(){
 				this.$http({
 					url:'/cross/queryRoadAndLane',
@@ -276,6 +301,11 @@
 			// SVG点击
 			openDia(i){
 				this.dialog = true
+				console.log(i)
+			},
+			// 选择车道类型
+			SelectTo(i){
+				
 			}
 			
 		}
@@ -289,87 +319,47 @@
 	
 	@contx:300px;
 	@conty:300px;
-	 
-	 .rotate(@de){
-	 		transform: rotate(@de);
-	 		-ms-transform:rotate(@de);
-	 		-moz-transform:rotate(@de);
-	 		-webkit-transform:rotate(@de);
-	 		-o-transform:rotate(@de); 
-	 }
-	 .r(@deg){
-	 	.rotate(@deg);
-	 	select{
-	 		margin: 10px 0px 10px 0px;
-	 		.rotate(-@deg)
-	 	}
-	 }
-	 .svg-contain{
-	 	// background-color: #eee;
-	 	width: @contx*2;
-	 	height: @conty*2;
-	 	margin:30px auto;
-	 	position: relative;
-	 }
-	 /* 设置路口 */
-	 .svg-contain input{
-	 	position: absolute;
-	 	// top: 200;
-	 	// left: 0;
-	 	z-index: 2;
-	 }
-	 .road {
-	 	width: @widx;
-	 	height: @heiy;
-	 	background-color: #a8adb7;
-	 	position: absolute;
-	 }
-	 .r0{
-	 	top: @conty - @heiy/2;
-	 	left:ceil(@contx - @heiy/2 - @heiy*sin(45deg) - @widx) 
-		// left: 50px;
-	 }
-	 .r45{
-	 	top:ceil( @conty - @heiy/2 - (@heiy*sin(45deg))/2 - (@heiy/2 + @widx/2*sin(45deg)));
-	 	left:ceil(@contx - @heiy/2- (@heiy*sin(45deg))/2 - (@widx/2 + @widx/2*cos(45deg)));
-	 	.r(45deg);
-	 }
-	 .r90{
-	 	top: ceil(@conty - @heiy/2 - @heiy*sin(45deg) - (@heiy/2+@widx/2));
-	 	left:ceil(@contx - @widx/2);
-	 	.r(90deg)
-	 }
-	 .r135{
-	 	top:ceil( @conty - @heiy/2 - (@heiy*sin(45deg))/2 - (@heiy/2 + @widx/2*sin(45deg)));
-	 	left: floor(@contx + @heiy/2+ (@heiy*sin(45deg))/2 - (@widx/2 - @widx/2*cos(45deg)));
-	 	.r(135deg)
-	 }
-	 .r180{
-	 	top:  @conty - @heiy/2;
-	 	left: floor(@contx + @heiy/2 + @heiy*sin(45deg));
-	 	.r(180deg)
-	 }
-	 .r225{
-	 	top:floor( @conty + @heiy/2 + (@heiy*sin(45deg))/2 - (@heiy/2 - @widx/2*sin(45deg)));
-	 	left: floor(@contx + @heiy/2+ (@heiy*sin(45deg))/2 - (@widx/2 - @widx/2*cos(45deg)));
-	 	.r(225deg)
-	 }
-	 .r270{
-	 	top: floor(@conty + @heiy/2 + @heiy*sin(45deg) - (@heiy/2-@widx/2));
-	 	left: ceil(@contx - @widx/2);
-	 	.r(270deg)
-	 }
-	 .r315{
-	 	top: floor( @conty + @heiy/2 + (@heiy*sin(45deg))/2 - (@heiy/2 - @widx/2*sin(45deg)));
-	 	left: ceil(@contx - @heiy/2- (@heiy*sin(45deg))/2 - (@widx/2 + @widx/2*cos(45deg)));
-	 	.r(315deg)
-	 }
+	@import  "~@/assets/theme/svgxhj.less";
+	// 设置表格超出屏幕长度后的滚动样式
 	 .laneseting{
 		 display: flex;
 		 .tablecont{
-		 	width: 50%;	 
+		 	width: 50%;	
+			 height: 700px;
+			 overflow-y: scroll;
 		 }
+		 .tablecont::-webkit-scrollbar {
+		         display: none;
+		  }
 	 }
 	 
+	 
+</style>
+<style lang="less">
+	.lanein{
+		// -webkit-transform:scale(1,-1);
+	}
+	.laneseting{
+		.el-dialog{
+			 min-height: 400px;
+			.el-card__body{
+					 padding: 14px!important;
+			}
+			.inblock{
+				display: inline-block;
+				width: 20%;
+				.el-image{
+					border: 1px solid #999999;
+				}
+				.imglab{
+					display: block;
+					margin-top:20px ;
+				}
+			}
+		}
+	}
+	
+	
+	
 </style>
 	<!-- @import "../../../assets/theme/svgxhj.less" -->

@@ -51,9 +51,9 @@
 		components:{RoadTo},
 		data(){
 			return {
-				widx:154,
-				heiy:80,
-				r:300,
+				widx:154,// 道路形状宽度  需要与样式中的长宽保持一致
+				heiy:80,//  道路形状高度
+				r:300,//
 				x1:'',
 				x2:'',
 				x3:'',
@@ -64,7 +64,7 @@
 				x8:'',
 				points:[],
 				roads:[],
-				inandout:{
+				inandout:{    //用于回显出入口车道数据
 					r0:{
 						in:0,
 						out:0
@@ -112,6 +112,7 @@
 			// this.getcro()
 		},
 		mounted(){
+			// 计算出中间8边形的8点坐标
 			this.crossId = this.$route.query.crossId
 			this.x1 = [this.r-(Math.sin(45 * Math.PI / 180)*this.heiy + this.heiy/2) ,this.r+this.heiy/2]
 			this.x1 = this.x1.join(',')
@@ -123,10 +124,11 @@
 			this.x7 =  [this.r+this.heiy/2 , this.r+(Math.sin(45 * Math.PI / 180)*this.heiy + this.heiy/2)].join(',')
 			this.x8 =  [this.r-this.heiy/2 , this.r+(Math.sin(45 * Math.PI / 180)*this.heiy + this.heiy/2)].join(',')
 			this.points = [this.x1,this.x2,this.x3,this.x4,this.x5,this.x6,this.x7,this.x8].join(' ')
-			// 获取当前路口设置数据
+			// 获取当前路口设置数据 ，用于回显
 			this.getcro()
 		},
 		methods:{
+			// 获取路口设置信息 用于回显
 			getcro(){
 				this.$http({
 					url:'/road/query',
@@ -142,15 +144,13 @@
 							this.inandout[item.roadAngle].in = item.inLaneNumber 
 							this.inandout[item.roadAngle].out = item.outLaneNumber
 						})
-						// console.log(this.inandout)
 					}else{
 						
 					}
 				})
 			},
+			
 			async savecro(func){
-				// this.comdata()
-				// console.log(darr)
 				let _this = this
 				let re = await this.$http({
 					url:'/road/saveRoadList',
@@ -167,7 +167,9 @@
 				})
 				return _this.saveStatus
 			},
+			// 获取当前设置数据 并与初始数据进行比较
 			comdata(){
+				// 定义数组用来获取当前道路设置数据
 				let darr = []
 				for(let i=0;i<this.roads.length;i++){
 					darr[i] ={
@@ -178,8 +180,8 @@
 						roadAngle:this.roads[i]
 					}
 				}
-				// console.log(this,'1111')
 				let _this = this
+				// 按照勾选中的道路，分别获取每条道路的序号、出入方向车道数
 				darr.forEach(function(v){	
 					switch(v.roadAngle){
 						case 'r90':
@@ -225,23 +227,23 @@
 					}
 				})
 				this.sendData = darr
-				// 
+				// 获取当前设置的道路组合
 				let roads = darr.map((v)=>{return v.roadAngle})
-				// 道路数据集合
+				// 获取当前设置的道路出入方向数据集合
 				let inandout0 ={}
 				Object.assign(inandout0,_this.$options.data().inandout)
 				darr.forEach(item =>{
 					inandout0[item.roadAngle].in = item.inLaneNumber 
 					inandout0[item.roadAngle].out = item.outLaneNumber
 				})
-				// 比较验证
+				//讲roads inandout0 与页面初始化，获取的数据比较验证、相同true则直接跳转，不同false 则提示是否保存数据更改跳转
 				if(this.compara(roads,this.roads,'array') && this.compara(inandout0,this.inandout,'obj')){
 					return true
 				}else{
 					return false
 				}
 			},
-			// 
+			// （比较函数，目前只针对数组和对象进行比较）
 			compara(a,b,type){
 				if(type =='array'){
 					if (a.length != b.length){
@@ -264,7 +266,7 @@
 					return true
 				}
 			},
-			
+			// 相应父组件页面的“下一步”tonext事件
 			async tonext(){
 				let _this = this
 				let flag = false
@@ -296,9 +298,6 @@
 				}
 				
 			}
-		},
-		watch:{
-			
 		},
 		// async beforeRouteLeave(to, from, next) {
 		//     // 导航离开该组件的对应路由时调用
@@ -345,89 +344,12 @@
 </script>
 
 <style lang="less">
-	// @import url("~@/assets/theme/svgxhj.less");
 	@widx:154px;
 	@heiy:80px;
 	
 	@contx:300px;
 	@conty:300px;
-	 
-	 .rotate(@de){
-	 		transform: rotate(@de);
-	 		-ms-transform:rotate(@de);
-	 		-moz-transform:rotate(@de);
-	 		-webkit-transform:rotate(@de);
-	 		-o-transform:rotate(@de); 
-	 }
-	 .r(@deg){
-	 	.rotate(@deg);
-	 	select{
-	 		margin: 10px 0px 10px 0px;
-	 		.rotate(-@deg)
-	 	}
-	 }
-	 .svg-contain{
-	 	// background-color: #eee;
-	 	width: @contx*2;
-	 	height: @conty*2;
-	 	margin:30px auto;
-	 	position: relative;
-	 }
-	 /* 设置路口 */
-	 .svg-contain input{
-	 	position: absolute;
-	 	// top: 200;
-	 	// left: 0;
-	 	z-index: 2;
-	 }
-	 .road {
-	 	width: @widx;
-	 	height: @heiy;
-	 	background-color: #a8adb7;
-	 	position: absolute;
-	 }
-	 .r0{
-	 	top: @conty - @heiy/2;
-	 	left:ceil(@contx - @heiy/2 - @heiy*sin(45deg) - @widx) 
-		// left: 50px;
-	 }
-	 .r45{
-	 	top:ceil( @conty - @heiy/2 - (@heiy*sin(45deg))/2 - (@heiy/2 + @widx/2*sin(45deg)));
-	 	left:ceil(@contx - @heiy/2- (@heiy*sin(45deg))/2 - (@widx/2 + @widx/2*cos(45deg)));
-	 	.r(45deg);
-	 }
-	 .r90{
-	 	top: ceil(@conty - @heiy/2 - @heiy*sin(45deg) - (@heiy/2+@widx/2));
-	 	left:ceil(@contx - @widx/2);
-	 	.r(90deg)
-	 }
-	 .r135{
-	 	top:ceil( @conty - @heiy/2 - (@heiy*sin(45deg))/2 - (@heiy/2 + @widx/2*sin(45deg)));
-	 	left: floor(@contx + @heiy/2+ (@heiy*sin(45deg))/2 - (@widx/2 - @widx/2*cos(45deg)));
-	 	.r(135deg)
-	 }
-	 .r180{
-	 	top:  @conty - @heiy/2;
-	 	left: floor(@contx + @heiy/2 + @heiy*sin(45deg));
-	 	.r(180deg)
-	 }
-	 .r225{
-	 	top:floor( @conty + @heiy/2 + (@heiy*sin(45deg))/2 - (@heiy/2 - @widx/2*sin(45deg)));
-	 	left: floor(@contx + @heiy/2+ (@heiy*sin(45deg))/2 - (@widx/2 - @widx/2*cos(45deg)));
-	 	.r(225deg)
-	 }
-	 .r270{
-	 	top: floor(@conty + @heiy/2 + @heiy*sin(45deg) - (@heiy/2-@widx/2));
-	 	left: ceil(@contx - @widx/2);
-	 	.r(270deg)
-	 }
-	 .r315{
-	 	top: floor( @conty + @heiy/2 + (@heiy*sin(45deg))/2 - (@heiy/2 - @widx/2*sin(45deg)));
-	 	left: ceil(@contx - @heiy/2- (@heiy*sin(45deg))/2 - (@widx/2 + @widx/2*cos(45deg)));
-	 	.r(315deg)
-	 }
-	 
-	 
+	 @import url("~@/assets/theme/svgxhj.less");
 	 
 	 
 </style>
