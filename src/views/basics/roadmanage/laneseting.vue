@@ -86,7 +86,7 @@
 				roadNo:[],
 				crossId:'',
 				crossName:'',
-				rw:100,
+				rw:120,
 				rh:160,
 				cx:300,
 				cy:300,
@@ -135,7 +135,7 @@
 					this.roadtable = res.data.roadInfoList
 					this.crossName = res.data.roadInfoList[0].crossName
 					if(this.lanetable.length==0){
-						// 初始化通道列表
+						// 当还未设置过车道时，初始化通道列表
 						this.initlane()
 					}
 					// console.log(this.roadList)
@@ -144,11 +144,14 @@
 				})
 			},
 			compuPoints(){
+				// 获取当前道路数量
 				let len = this.roadList.length
+				// 定义坐标集合
 				let p = []
 				// 数组排序，相邻两项 相同，则去重，画图
-				// 计算出所有的点，匹配道路类，获取点，方便排序
+				// 计算出所有的点，
 				this.allpoint()
+				// 根据道路类，匹配获取当前所设置的道路的衔接点坐标
 				for(let i=0;i<len;i++){
 					switch(this.roadNo[i]){
 						case 0:
@@ -202,6 +205,9 @@
 					}
 				}
 				console.log(p)
+				// 根据上面得出的衔接点坐标，拼接路径中的path属性  画出中间衔接部分的图形
+				// 思路：一条道路的一端有两个坐标点、相邻的道路会有重合坐标点，判断道路序号是否相邻，是则忽略一次重合点的连接，否，则连接上一条道路的第二个点坐标和下一道路的第一个点坐标
+				// 注意：序号0和7也是响铃的，需要单独判断\  Cpoint是控制点坐标，目前是用的直线连接所以可有可无，如果需要有弧度的曲线，则需要计算Cpoint位置，增加控制弧度
 				this.path = "M "+p[0].points[1].join(",")
 				for(let i = 0; i<p.length ;i++){
 					if(i != p.length-1){
@@ -225,7 +231,7 @@
 					
 				}
 			},
-			// 所有道路内侧衔接点 信息
+			// 计算出 所有道路内侧衔接点 坐标
 			allpoint(){
 				let x1 = [this.cx-this.rh/2-Math.sin(45 * Math.PI / 180)*this.rh,this.cy+this.rh/2]
 				let x2 = [this.cx-this.rh/2-Math.sin(45 * Math.PI / 180)*this.rh,this.cy-this.rh/2]
@@ -298,12 +304,12 @@
 					break;
 				}
 			},
-			// SVG点击
+			// SVG车道点击事件
 			openDia(i){
 				this.dialog = true
 				console.log(i)
 			},
-			// 选择车道类型
+			// 弹窗中点击事件：选择车道类型
 			SelectTo(i){
 				
 			}
@@ -314,7 +320,7 @@
 
 <style lang="less" scoped>
 	// s设置道路宽高样式变量
-	@widx:100px;
+	@widx:120px;
 	@heiy:160px;
 	
 	@contx:300px;
